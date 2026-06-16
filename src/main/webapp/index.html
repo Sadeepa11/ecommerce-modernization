@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechMart Online - Enterprise Modernization Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <div class="logo-icon">TM</div>
+                <div>
+                    <h1>TechMart Online</h1>
+                    <p class="subtitle">Java EE Platform Modernization Console</p>
+                </div>
+            </div>
+            <div class="status-indicator">
+                <span class="pulse-dot"></span>
+                <span>System Status: Active (Java EE 8 / JTA)</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- Metrics Section -->
+        <section class="section metrics-section">
+            <div class="section-title">
+                <h2>Real-Time System Metrics (Singleton EJB Stats)</h2>
+                <span class="refresh-badge" id="refresh-badge">Live Updates Active</span>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Active Sessions</div>
+                    <div class="metric-value" id="stat-sessions">0</div>
+                    <div class="metric-desc">Stateful ShoppingCartSessions</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Requests</div>
+                    <div class="metric-value" id="stat-requests">0</div>
+                    <div class="metric-desc">Platform-wide hits (Stateless EJB)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">JMS Queue Depth (Orders)</div>
+                    <div class="metric-value" id="stat-orders">0</div>
+                    <div class="metric-desc">Total orders sent to JMS queue</div>
+                </div>
+                <div class="metric-card success">
+                    <div class="metric-label">Completed Orders</div>
+                    <div class="metric-value" id="stat-success">0</div>
+                    <div class="metric-desc">Successful transactions (MDB logic)</div>
+                </div>
+                <div class="metric-card danger">
+                    <div class="metric-label">Failed Orders</div>
+                    <div class="metric-value" id="stat-failed">0</div>
+                    <div class="metric-desc">Stock shortages (Transaction rolled back)</div>
+                </div>
+                <div class="metric-card info">
+                    <div class="metric-label">Avg Processing Latency</div>
+                    <div class="metric-value"><span id="stat-latency">0</span> ms</div>
+                    <div class="metric-desc">Asynchronous consumer delay</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="layout-columns">
+            <!-- Left Column: Catalog & Cart -->
+            <div class="column-left">
+                <!-- Seeding Tool if Catalog is Empty -->
+                <div class="quick-action-bar" id="seed-bar">
+                    <span>Database seems unseeded.</span>
+                    <button class="btn btn-secondary btn-sm" onclick="seedDatabase()">Seed Mock Data</button>
+                </div>
+
+                <section class="section">
+                    <div class="section-title">
+                        <h2>E-Commerce Product Catalog</h2>
+                    </div>
+                    <div class="product-grid" id="product-list">
+                        <!-- Products will be loaded here -->
+                        <div class="loading-spinner">Loading product catalog...</div>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="section-title">
+                        <h2>Personal Shopping Cart (Stateful EJB)</h2>
+                    </div>
+                    <div class="cart-card">
+                        <div class="customer-info-form">
+                            <label for="cust-name">Customer Name:</label>
+                            <input type="text" id="cust-name" placeholder="Enter name to initialize session" value="John Doe">
+                        </div>
+                        <div id="cart-contents" class="cart-contents-empty">
+                            Your stateful shopping cart is empty. Add products from the catalog above.
+                        </div>
+                        <div class="cart-actions" id="cart-actions-panel" style="display: none;">
+                            <button class="btn btn-primary" onclick="checkout()">Checkout Asynchronously (JMS)</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: System Log / Event Stream -->
+            <div class="column-right">
+                <section class="section logs-section">
+                    <div class="section-title">
+                        <h2>System Log & Event Stream</h2>
+                    </div>
+                    <div class="logs-container" id="logs-panel">
+                        <!-- Live log entries will be loaded here -->
+                        <div class="log-entry">Waiting for system logs...</div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 TechMart Online Inc. All rights reserved. Platform Modernization Phase I.</p>
+            <p>Built with Java EE 8, EJB 3.2, JMS 2.0, JPA 2.2, and JTA.</p>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE = './api';
+        let currentCart = {};
+
+        // Fetch products, metrics, and cart on startup
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProducts();
+            loadCart();
+            // Start metrics polling loop
+            startMetricsPolling();
+        });
+
+        function loadProducts() {
+            fetch(`${API_BASE}/products`)
+                .then(res => res.json())
+                .then(products => {
+                    const grid = document.getElementById('product-list');
+                    if (products.length === 0) {
+                        grid.innerHTML = `<div class="empty-state">No products found in DB. Use the seed button above to populate database.</div>`;
+                        document.getElementById('seed-bar').style.display = 'flex';
+                        return;
+                    }
+                    document.getElementById('seed-bar').style.display = 'none';
+                    grid.innerHTML = products.map(p => `
+                        <div class="product-item">
+                            <div class="product-badge">${p.warehouse}</div>
+                            <h3>${p.name}</h3>
+                            <p class="sku">SKU: ${p.sku}</p>
+                            <div class="product-meta">
+                                <span class="price">$${p.price.toFixed(2)}</span>
+                                <span class="stock ${p.stock < 10 ? 'low-stock' : ''}">Stock: ${p.stock} units</span>
+                            </div>
+                            <div class="purchase-controls">
+                                <input type="number" id="qty-${p.sku}" min="1" max="${p.stock}" value="1" class="qty-input">
+                                <button class="btn btn-primary btn-sm" onclick="addToCart('${p.sku}')">Add to Cart</button>
+                            </div>
+                        </div>
+                    `).join('');
+                })
+                .catch(err => {
+                    console.error("Error loading products:", err);
+                    document.getElementById('product-list').innerHTML = `<div class="error-state">Failed to load product catalog. Database may not be running or initialized.</div>`;
+                });
+        }
+
+        function seedDatabase() {
+            fetch(`${API_BASE}/seed`)
+                .then(res => res.json())
+                .then(data => {
+                    loadProducts();
+                })
+                .catch(err => alert("Error seeding database: " + err));
+        }
+
+        function loadCart() {
+            fetch(`${API_BASE}/cart/view`)
+                .then(res => res.json())
+                .then(cart => {
+                    currentCart = cart;
+                    updateCartUI();
+                })
+                .catch(err => console.error("Error loading cart:", err));
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-contents');
+            const actionsPanel = document.getElementById('cart-actions-panel');
+            const keys = Object.keys(currentCart.items || {});
+
+            if (keys.length === 0) {
+                container.innerHTML = `Your stateful shopping cart is empty. Add products from the catalog above.`;
+                container.className = "cart-contents-empty";
+                actionsPanel.style.display = 'none';
+            } else {
+                container.className = "cart-contents-list";
+                actionsPanel.style.display = 'block';
+                let html = `<table>
+                    <thead>
+                        <tr>
+                            <th>Product SKU</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                for (let sku in currentCart.items) {
+                    html += `<tr>
+                        <td><strong>${sku}</strong></td>
+                        <td>${currentCart.items[sku]} units</td>
+                    </tr>`;
+                }
+                html += `</tbody></table>`;
+                container.innerHTML = html;
+            }
+        }
+
+        function addToCart(sku) {
+            const customerName = document.getElementById('cust-name').value.trim();
+            if (!customerName) {
+                alert("Please enter a customer name to start a shopping session!");
+                return;
+            }
+
+            const qty = document.getElementById(`qty-${sku}`).value;
+            const params = new URLSearchParams();
+            params.append('sku', sku);
+            params.append('quantity', qty);
+            params.append('customerName', customerName);
+
+            fetch(`${API_BASE}/cart/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params
+            })
+            .then(async res => {
+                const data = await res.json();
+                if (res.ok) {
+                    loadCart();
+                    loadProducts(); // Refresh stock display
+                } else {
+                    alert(data.message || "Failed to add item to cart.");
+                }
+            })
+            .catch(err => console.error("Error adding to cart:", err));
+        }
+
+        function checkout() {
+            fetch(`${API_BASE}/checkout`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message || "Checkout processed.");
+                    loadCart();
+                    loadProducts();
+                })
+                .catch(err => console.error("Error in checkout:", err));
+        }
+
+        function startMetricsPolling() {
+            setInterval(() => {
+                fetch(`${API_BASE}/metrics`)
+                    .then(res => res.json())
+                    .then(metrics => {
+                        document.getElementById('stat-sessions').innerText = metrics.activeSessions;
+                        document.getElementById('stat-requests').innerText = metrics.totalRequests;
+                        document.getElementById('stat-orders').innerText = metrics.totalOrders;
+                        document.getElementById('stat-success').innerText = metrics.successfulOrders;
+                        document.getElementById('stat-failed').innerText = metrics.failedOrders;
+                        document.getElementById('stat-latency').innerText = metrics.avgResponseTimeMs;
+
+                        // Update event logs panel
+                        const logsPanel = document.getElementById('logs-panel');
+                        if (metrics.logs && metrics.logs.length > 0) {
+                            logsPanel.innerHTML = metrics.logs.map(log => {
+                                let badgeClass = "log-default";
+                                if (log.includes("deduct") || log.includes("restock")) badgeClass = "log-inventory";
+                                if (log.includes("JMS") || log.includes("MDB")) badgeClass = "log-jms";
+                                if (log.includes("Asynchronous")) badgeClass = "log-async";
+                                if (log.includes("FAILED") || log.includes("out-of-stock") || log.includes("Error")) badgeClass = "log-error";
+                                if (log.includes("success") || log.includes("COMPLETED")) badgeClass = "log-success";
+
+                                return `<div class="log-entry ${badgeClass}">${log}</div>`;
+                            }).join('');
+                            // Auto scroll logs panel to bottom
+                            logsPanel.scrollTop = logsPanel.scrollHeight;
+                        }
+                    })
+                    .catch(err => console.error("Error fetching metrics:", err));
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
