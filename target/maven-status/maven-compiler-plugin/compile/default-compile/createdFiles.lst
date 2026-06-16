@@ -1,0 +1,9 @@
+com\techmart\ejb\InventoryService.class
+com\techmart\ejb\ShoppingCartSession.class
+com\techmart\ejb\PlatformMetricsRegistry.class
+com\techmart\ejb\NotificationService.class
+com\techmart\controller\PlatformControllerServlet.class
+com\techmart\model\OrderEntity.class
+com\techmart\jms\OrderProcessingProducer.class
+com\techmart\jms\OrderProcessorMDB.class
+com\techmart\model\Product.class
