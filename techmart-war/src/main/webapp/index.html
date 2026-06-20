@@ -27,46 +27,6 @@
     </header>
 
     <main class="app-container">
-        <!-- Metrics Section -->
-        <section class="section metrics-section">
-            <div class="section-title">
-                <h2>Real-Time System Metrics (Singleton EJB Stats)</h2>
-                <span class="refresh-badge" id="refresh-badge">Live Updates Active</span>
-            </div>
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-label">Active Sessions</div>
-                    <div class="metric-value" id="stat-sessions">0</div>
-                    <div class="metric-desc">Stateful ShoppingCartSessions</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Total Requests</div>
-                    <div class="metric-value" id="stat-requests">0</div>
-                    <div class="metric-desc">Platform-wide hits (Stateless EJB)</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">JMS Queue Depth (Orders)</div>
-                    <div class="metric-value" id="stat-orders">0</div>
-                    <div class="metric-desc">Total orders sent to JMS queue</div>
-                </div>
-                <div class="metric-card success">
-                    <div class="metric-label">Completed Orders</div>
-                    <div class="metric-value" id="stat-success">0</div>
-                    <div class="metric-desc">Successful transactions (MDB logic)</div>
-                </div>
-                <div class="metric-card danger">
-                    <div class="metric-label">Failed Orders</div>
-                    <div class="metric-value" id="stat-failed">0</div>
-                    <div class="metric-desc">Stock shortages (Transaction rolled back)</div>
-                </div>
-                <div class="metric-card info">
-                    <div class="metric-label">Avg Processing Latency</div>
-                    <div class="metric-value"><span id="stat-latency">0</span> ms</div>
-                    <div class="metric-desc">Asynchronous consumer delay</div>
-                </div>
-            </div>
-        </section>
-
         <div class="layout-columns">
             <!-- Left Column: Catalog & Cart -->
             <div class="column-left">
@@ -105,8 +65,49 @@
                 </section>
             </div>
 
-            <!-- Right Column: System Log / Event Stream -->
+            <!-- Right Column: Admin Console (Metrics & Logs) -->
             <div class="column-right">
+                <!-- Metrics Section -->
+                <section class="section metrics-section">
+                    <div class="section-title">
+                        <h2>Real-Time System Metrics (Singleton EJB Stats)</h2>
+                        <span class="refresh-badge" id="refresh-badge">Live Updates</span>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Active Sessions</div>
+                            <div class="metric-value" id="stat-sessions">0</div>
+                            <div class="metric-desc">Stateful ShoppingCarts</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Total Requests</div>
+                            <div class="metric-value" id="stat-requests">0</div>
+                            <div class="metric-desc">Hits (Stateless EJB)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">JMS Queue Depth</div>
+                            <div class="metric-value" id="stat-orders">0</div>
+                            <div class="metric-desc">Total queue orders</div>
+                        </div>
+                        <div class="metric-card success">
+                            <div class="metric-label">Completed Orders</div>
+                            <div class="metric-value" id="stat-success">0</div>
+                            <div class="metric-desc">MDB processed</div>
+                        </div>
+                        <div class="metric-card danger">
+                            <div class="metric-label">Failed Orders</div>
+                            <div class="metric-value" id="stat-failed">0</div>
+                            <div class="metric-desc">Stock shortages</div>
+                        </div>
+                        <div class="metric-card info">
+                            <div class="metric-label">Processing Latency</div>
+                            <div class="metric-value"><span id="stat-latency">0</span> ms</div>
+                            <div class="metric-desc">Async consumer delay</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Logs Section -->
                 <section class="section logs-section">
                     <div class="section-title">
                         <h2>System Log & Event Stream</h2>
