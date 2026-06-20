@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.techmart</groupId>
+        <artifactId>ecommerce-modernization</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>techmart-ear</artifactId>
+    <packaging>ear</packaging>
+
+    <name>TechMart EAR Module</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.techmart</groupId>
+            <artifactId>techmart-ejb</artifactId>
+            <version>${project.version}</version>
+            <type>ejb</type>
+        </dependency>
+        <dependency>
+            <groupId>com.techmart</groupId>
+            <artifactId>techmart-war</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+        <!-- Bundle MySQL Connector inside EAR lib/ -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>ecommerce-modernization</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ear-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <version>8</version>
+                    <defaultLibBundleDir>lib</defaultLibBundleDir>
+                    <modules>
+                        <ejbModule>
+                            <groupId>com.techmart</groupId>
+                            <artifactId>techmart-ejb</artifactId>
+                            <bundleFileName>techmart-ejb.jar</bundleFileName>
+                        </ejbModule>
+                        <webModule>
+                            <groupId>com.techmart</groupId>
+                            <artifactId>techmart-war</artifactId>
+                            <bundleFileName>techmart-war.war</bundleFileName>
+                            <contextRoot>/ecommerce-modernization</contextRoot>
+                        </webModule>
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

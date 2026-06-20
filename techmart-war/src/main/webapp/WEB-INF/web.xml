@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+    <display-name>TechMart Online E-Commerce Modernization</display-name>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+    <!-- Define MySQL Datasource for JPA/Hibernate -->
+    <data-source>
+        <name>java:app/jdbc/TechMartDS</name>
+        <class-name>com.mysql.cj.jdbc.MysqlDataSource</class-name>
+        <url>jdbc:mysql://localhost:3306/techmart_db?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC&amp;createDatabaseIfNotExist=true</url>
+        <user>root</user>
+        <!-- Change the password below if your MySQL root password is different -->
+        <password>Sata.Pata.123</password>
+    </data-source>
+</web-app>
