@@ -139,6 +139,20 @@
             startMetricsPolling();
         });
 
+        function getProductIcon(sku) {
+            if (sku.startsWith('LAP')) {
+                return `<div class="product-icon laptop-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="20" x2="22" y2="20"></line><line x1="12" y1="20" x2="12" y2="17"></line></svg></div>`;
+            } else if (sku.startsWith('PHN')) {
+                return `<div class="product-icon phone-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg></div>`;
+            } else if (sku.startsWith('KEY')) {
+                return `<div class="product-icon keyboard-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6.01" y2="8"></line><line x1="10" y1="8" x2="10.01" y2="8"></line><line x1="14" y1="8" x2="14.01" y2="8"></line><line x1="18" y1="8" x2="18.01" y2="8"></line><line x1="6" y1="12" x2="6.01" y2="12"></line><line x1="10" y1="12" x2="10.01" y2="12"></line><line x1="14" y1="12" x2="14.01" y2="12"></line><line x1="18" y1="12" x2="18.01" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg></div>`;
+            } else if (sku.startsWith('MOU')) {
+                return `<div class="product-icon mouse-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="7" ry="7"></rect><line x1="12" y1="6" x2="12" y2="12"></line></svg></div>`;
+            } else {
+                return `<div class="product-icon generic-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><polygon points="12 22.08 12 12 3 6.92 3 17.08 12 22.08"></polygon><polygon points="12 22.08 21 17.08 21 6.92 12 12 12 22.08"></polygon><polygon points="12 12 21 6.92 12 2 3 6.92 12 12"></polygon><line x1="12" y1="5.12" x2="12" y2="12"></line></svg></div>`;
+            }
+        }
+
         function loadProducts() {
             fetch(`${API_BASE}/products`)
                 .then(res => res.json())
@@ -150,9 +164,12 @@
                         return;
                     }
                     document.getElementById('seed-bar').style.display = 'none';
-                    grid.innerHTML = products.map(p => `
+                    grid.innerHTML = products.map(p => {
+                        const icon = getProductIcon(p.sku);
+                        return `
                         <div class="product-item">
                             <div class="product-badge">${p.warehouse}</div>
+                            ${icon}
                             <h3>${p.name}</h3>
                             <p class="sku">SKU: ${p.sku}</p>
                             <div class="product-meta">
@@ -164,7 +181,8 @@
                                 <button class="btn btn-primary btn-sm" onclick="addToCart('${p.sku}')">Add to Cart</button>
                             </div>
                         </div>
-                    `).join('');
+                        `;
+                    }).join('');
                 })
                 .catch(err => {
                     console.error("Error loading products:", err);
