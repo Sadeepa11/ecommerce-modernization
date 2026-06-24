@@ -3,6 +3,8 @@ package com.techmart.model;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -16,12 +18,6 @@ public class OrderEntity implements Serializable {
     @Column(name = "customer_name", nullable = false)
     private String customerName;
 
-    @Column(name = "product_sku", nullable = false)
-    private String productSku;
-
-    @Column(nullable = false)
-    private Integer quantity;
-
     @Column(name = "total_price", nullable = false)
     private Double totalPrice;
 
@@ -34,12 +30,13 @@ public class OrderEntity implements Serializable {
     @Column(name = "processing_time_ms")
     private Long processingTimeMs;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<OrderItemEntity> items = new ArrayList<>();
+
     public OrderEntity() {}
 
-    public OrderEntity(String customerName, String productSku, Integer quantity, Double totalPrice, String status) {
+    public OrderEntity(String customerName, Double totalPrice, String status) {
         this.customerName = customerName;
-        this.productSku = productSku;
-        this.quantity = quantity;
         this.totalPrice = totalPrice;
         this.status = status;
         this.createdAt = LocalDateTime.now();
@@ -60,22 +57,6 @@ public class OrderEntity implements Serializable {
 
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
-    }
-
-    public String getProductSku() {
-        return productSku;
-    }
-
-    public void setProductSku(String productSku) {
-        this.productSku = productSku;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
     }
 
     public Double getTotalPrice() {
@@ -108,5 +89,13 @@ public class OrderEntity implements Serializable {
 
     public void setProcessingTimeMs(Long processingTimeMs) {
         this.processingTimeMs = processingTimeMs;
+    }
+
+    public List<OrderItemEntity> getItems() {
+        return items;
+    }
+
+    public void setItems(List<OrderItemEntity> items) {
+        this.items = items;
     }
 }

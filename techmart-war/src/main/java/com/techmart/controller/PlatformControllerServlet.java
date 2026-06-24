@@ -18,6 +18,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+
 
 @WebServlet(name = "PlatformControllerServlet", urlPatterns = {
     "/api/products",
@@ -133,12 +137,21 @@ public class PlatformControllerServlet extends HttpServlet {
                     return;
                 }
 
-                // Process each cart item through JMS Queue asynchronously
+                // Build a JSON array of the order items
+                JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 for (Map.Entry<String, Integer> entry : items.entrySet()) {
                     Product product = inventoryService.getProductBySku(entry.getKey());
                     double price = product != null ? product.getPrice() : 0.0;
-                    orderProducer.sendOrderMessage(customer, entry.getKey(), entry.getValue(), price);
+                    JsonObjectBuilder item = Json.createObjectBuilder()
+                        .add("sku", entry.getKey())
+                        .add("quantity", entry.getValue())
+                        .add("price", price);
+                    arrayBuilder.add(item);
                 }
+                String itemsJson = arrayBuilder.build().toString();
+
+                // Send a single JMS message for the entire checkout order
+                orderProducer.sendOrderMessage(customer, itemsJson);
 
                 cart.clearCart();
                 out.print("{\"status\":\"success\", \"message\":\"Order placed successfully in JMS queue! Processing asynchronously.\"}");

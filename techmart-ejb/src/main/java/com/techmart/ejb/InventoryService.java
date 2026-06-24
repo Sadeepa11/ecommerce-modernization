@@ -49,6 +49,21 @@ public class InventoryService {
         return false;
     }
 
+    public synchronized boolean deductStockForOrder(java.util.Map<String, Integer> items) {
+        // First check availability of all items to ensure atomicity
+        for (java.util.Map.Entry<String, Integer> entry : items.entrySet()) {
+            if (!checkAvailability(entry.getKey(), entry.getValue())) {
+                metrics.addLog("Order Stock Deduction failed: SKU " + entry.getKey() + " has insufficient inventory.");
+                return false;
+            }
+        }
+        // If all are available, deduct all
+        for (java.util.Map.Entry<String, Integer> entry : items.entrySet()) {
+            deductStock(entry.getKey(), entry.getValue());
+        }
+        return true;
+    }
+
     public void restock(String sku, int quantity) {
         Product product = getProductBySku(sku);
         if (product != null) {

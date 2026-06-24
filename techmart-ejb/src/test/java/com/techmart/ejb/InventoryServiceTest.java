@@ -124,4 +124,36 @@ public class InventoryServiceTest {
         verify(em, never()).merge(any());
         verify(metrics).addLog(contains("Failed to deduct stock"));
     }
+
+    @Test
+    public void testDeductStockForOrder_Success() {
+        TypedQuery<Product> query = mock(TypedQuery.class);
+        when(em.createQuery(anyString(), eq(Product.class))).thenReturn(query);
+        when(query.setParameter(eq("sku"), anyString())).thenReturn(query);
+        when(query.getSingleResult()).thenReturn(sampleProduct);
+
+        java.util.Map<String, Integer> items = new java.util.HashMap<>();
+        items.put("TEST-01", 10);
+
+        boolean success = inventoryService.deductStockForOrder(items);
+        assertTrue(success);
+        assertEquals(40, sampleProduct.getStock());
+        verify(em).merge(sampleProduct);
+    }
+
+    @Test
+    public void testDeductStockForOrder_Failure() {
+        TypedQuery<Product> query = mock(TypedQuery.class);
+        when(em.createQuery(anyString(), eq(Product.class))).thenReturn(query);
+        when(query.setParameter(eq("sku"), anyString())).thenReturn(query);
+        when(query.getSingleResult()).thenReturn(sampleProduct);
+
+        java.util.Map<String, Integer> items = new java.util.HashMap<>();
+        items.put("TEST-01", 60);
+
+        boolean success = inventoryService.deductStockForOrder(items);
+        assertFalse(success);
+        assertEquals(50, sampleProduct.getStock());
+        verify(em, never()).merge(any());
+    }
 }
