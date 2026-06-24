@@ -29,16 +29,14 @@ public class OrderProcessingProducer {
     @EJB
     private PlatformMetricsRegistry metrics;
 
-    public void sendOrderMessage(String customerName, String sku, int quantity, double price) {
+    public void sendOrderMessage(String customerName, String itemsJson) {
         try {
             metrics.incrementRequests(); // Count this incoming request
-            metrics.addLog("Creating JMS message for order: " + customerName + ", SKU: " + sku + " x" + quantity);
+            metrics.addLog("Creating JMS message for order of customer: " + customerName);
 
             MapMessage mapMessage = jmsContext.createMapMessage();
             mapMessage.setString("customerName", customerName);
-            mapMessage.setString("sku", sku);
-            mapMessage.setInt("quantity", quantity);
-            mapMessage.setDouble("price", price);
+            mapMessage.setString("itemsJson", itemsJson);
 
             JMSProducer producer = jmsContext.createProducer();
             
@@ -46,7 +44,7 @@ public class OrderProcessingProducer {
             // To optimize performance, we can configure delivery options here
             producer.send(orderQueue, mapMessage);
 
-            metrics.addLog("Order message sent to JMS Queue: java:/jms/queue/OrderQueue successfully.");
+            metrics.addLog("Order message sent to JMS Queue successfully.");
         } catch (Exception e) {
             metrics.addLog("JMS Error sending message: " + e.getMessage());
             metrics.incrementFailedOrders();

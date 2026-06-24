@@ -4,6 +4,7 @@ import com.techmart.ejb.InventoryService;
 import com.techmart.ejb.NotificationService;
 import com.techmart.ejb.PlatformMetricsRegistry;
 import com.techmart.model.OrderEntity;
+import com.techmart.model.OrderItemEntity;
 import jakarta.ejb.ActivationConfigProperty;
 import jakarta.ejb.EJB;
 import jakarta.ejb.MessageDriven;
@@ -13,7 +14,17 @@ import jakarta.jms.Message;
 import jakarta.jms.MessageListener;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import java.io.StringReader;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 @JMSDestinationDefinition(
     name = "java:app/jms/OrderQueue",
@@ -48,16 +59,25 @@ public class OrderProcessorMDB implements MessageListener {
             if (message instanceof MapMessage) {
                 MapMessage mapMsg = (MapMessage) message;
                 String customerName = mapMsg.getString("customerName");
-                String sku = mapMsg.getString("sku");
-                int quantity = mapMsg.getInt("quantity");
-                double price = mapMsg.getDouble("price");
+                String itemsJson = mapMsg.getString("itemsJson");
 
-                metrics.addLog("MDB: Received order request for customer '" + customerName + "', SKU '" + sku + "' x" + quantity);
+                metrics.addLog("MDB: Received order request for customer '" + customerName + "'");
 
-                // Check and deduct inventory
-                boolean success = inventoryService.deductStock(sku, quantity);
+                // Parse items JSON
+                JsonReader jsonReader = Json.createReader(new StringReader(itemsJson));
+                JsonArray itemsArray = jsonReader.readArray();
+                jsonReader.close();
+
+                // Prepare stock deduction map
+                Map<String, Integer> itemsToDeduct = new HashMap<>();
+                for (int i = 0; i < itemsArray.size(); i++) {
+                    JsonObject obj = itemsArray.getJsonObject(i);
+                    itemsToDeduct.put(obj.getString("sku"), obj.getInt("quantity"));
+                }
+
+                // Check and deduct inventory atomically
+                boolean success = inventoryService.deductStockForOrder(itemsToDeduct);
                 String status;
-                double total = price * quantity;
 
                 if (success) {
                     status = "COMPLETED";
@@ -65,18 +85,53 @@ public class OrderProcessorMDB implements MessageListener {
                     metrics.addLog("MDB: Order processed successfully for " + customerName);
                     
                     // Asynchronously send order success notification
-                    notificationService.sendNotificationAsync(customerName, "Your order for " + quantity + "x " + sku + " was successful!");
+                    StringBuilder notificationMsg = new StringBuilder("Your order was successful! Items: ");
+                    for (int i = 0; i < itemsArray.size(); i++) {
+                        JsonObject obj = itemsArray.getJsonObject(i);
+                        notificationMsg.append(obj.getInt("quantity")).append("x ").append(obj.getString("sku"));
+                        if (i < itemsArray.size() - 1) {
+                            notificationMsg.append(", ");
+                        }
+                    }
+                    notificationService.sendNotificationAsync(customerName, notificationMsg.toString());
                 } else {
                     status = "FAILED";
                     metrics.incrementFailedOrders();
                     metrics.addLog("MDB: Order processing FAILED for " + customerName + " due to out-of-stock.");
 
                     // Asynchronously send order failure notification
-                    notificationService.sendNotificationAsync(customerName, "Sorry! Your order for " + quantity + "x " + sku + " failed due to insufficient stock.");
+                    StringBuilder notificationMsg = new StringBuilder("Sorry! Your order failed due to insufficient stock. Items requested: ");
+                    for (int i = 0; i < itemsArray.size(); i++) {
+                        JsonObject obj = itemsArray.getJsonObject(i);
+                        notificationMsg.append(obj.getInt("quantity")).append("x ").append(obj.getString("sku"));
+                        if (i < itemsArray.size() - 1) {
+                            notificationMsg.append(", ");
+                        }
+                    }
+                    notificationService.sendNotificationAsync(customerName, notificationMsg.toString());
                 }
 
                 // Create Order record in database
-                OrderEntity order = new OrderEntity(customerName, sku, quantity, total, status);
+                OrderEntity order = new OrderEntity();
+                order.setCustomerName(customerName);
+                order.setStatus(status);
+                order.setCreatedAt(LocalDateTime.now());
+
+                double total = 0.0;
+                List<OrderItemEntity> orderItems = new ArrayList<>();
+                for (int i = 0; i < itemsArray.size(); i++) {
+                    JsonObject obj = itemsArray.getJsonObject(i);
+                    String sku = obj.getString("sku");
+                    int quantity = obj.getInt("quantity");
+                    double price = obj.getJsonNumber("price").doubleValue();
+                    total += price * quantity;
+
+                    OrderItemEntity item = new OrderItemEntity(order, sku, quantity, price);
+                    orderItems.add(item);
+                }
+                order.setTotalPrice(total);
+                order.setItems(orderItems);
+
                 long duration = System.currentTimeMillis() - startTime;
                 order.setProcessingTimeMs(duration);
                 em.persist(order);
