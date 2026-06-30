@@ -1,12 +1,15 @@
 package com.techmart.ejb;
 
+import com.techmart.interceptor.PerformanceInterceptor;
 import jakarta.ejb.AsyncResult;
 import jakarta.ejb.Asynchronous;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.interceptor.Interceptors;
 import java.util.concurrent.Future;
 
 @Stateless
+@Interceptors(PerformanceInterceptor.class)
 public class NotificationService {
 
     @EJB

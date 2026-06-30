@@ -3,137 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechMart Online - Enterprise Modernization Dashboard</title>
+    <title>TechMart Online - Java EE Modernization Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <!-- Custom Toast Notification Container -->
     <div id="toast-container" class="toast-container"></div>
 
-    <header class="app-header">
-        <div class="header-container">
-            <div class="logo-area">
-                <div class="logo-icon">TM</div>
-                <div>
-                    <h1>TechMart Online</h1>
-                    <p class="subtitle">Java EE Platform Modernization Console</p>
-                </div>
-            </div>
-            <div class="status-indicator">
-                <span class="pulse-dot"></span>
-                <span>System Status: Active (Java EE 8 / JTA)</span>
-            </div>
-        </div>
-    </header>
-
-    <main class="app-container">
-        <div class="layout-columns">
-            <!-- Left Column: Catalog & Cart -->
-            <div class="column-left">
-                <!-- Seeding Tool if Catalog is Empty -->
-                <div class="quick-action-bar" id="seed-bar">
-                    <span>Database seems unseeded.</span>
-                    <button class="btn btn-secondary btn-sm" onclick="seedDatabase()">Seed Mock Data</button>
+    <!-- ==================== CUSTOMER PORTAL VIEW ==================== -->
+    <div id="customer-view">
+        <header class="cust-header">
+            <div class="nav-container">
+                <div class="cust-logo">
+                    <div class="cust-logo-icon">TM</div>
+                    <div class="cust-logo-text">
+                        <h1>TechMart Online</h1>
+                        <p>Java EE Platform Modernization</p>
+                    </div>
                 </div>
 
-                <section class="section">
-                    <div class="section-title">
-                        <h2>E-Commerce Product Catalog</h2>
-                    </div>
-                    <div class="product-grid" id="product-list">
-                        <!-- Products will be loaded here -->
-                        <div class="loading-spinner">Loading product catalog...</div>
-                    </div>
-                </section>
+                <nav class="cust-tabs">
+                    <button class="cust-tab-btn active" id="tab-btn-catalog" onclick="switchCustomerTab('catalog')">Catalog</button>
+                    <button class="cust-tab-btn" id="tab-btn-cart" onclick="switchCustomerTab('cart')">Cart</button>
+                    <button class="cust-tab-btn" id="tab-btn-orders" onclick="switchCustomerTab('orders')">Orders</button>
+                    <button class="cust-tab-btn" id="tab-btn-performance" onclick="switchCustomerTab('performance')">Performance</button>
+                </nav>
 
-                <section class="section">
-                    <div class="section-title">
-                        <h2>Personal Shopping Cart (Stateful EJB)</h2>
-                    </div>
-                    <div class="cart-card">
-                        <div class="customer-info-form">
-                            <label for="cust-name">Customer Name:</label>
-                            <input type="text" id="cust-name" placeholder="Enter name to initialize session" value="John Doe">
-                        </div>
-                        <div id="cart-contents" class="cart-contents-empty">
-                            Your stateful shopping cart is empty. Add products from the catalog above.
-                        </div>
-                        <div class="cart-actions" id="cart-actions-panel" style="display: none;">
-                            <button class="btn btn-primary" onclick="checkout()">Checkout Asynchronously (JMS)</button>
-                        </div>
-                    </div>
-                </section>
+                <div class="cust-header-actions">
+                    <button class="cart-icon-btn" onclick="switchCustomerTab('cart')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                        <span class="cart-badge" id="cart-badge-count">0</span>
+                    </button>
+                    <div class="avatar-badge" title="Customer Initials">JD</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="cust-main">
+            <!-- CATALOG TAB -->
+            <div id="cust-tab-catalog" class="cust-tab-content">
+                <div class="cust-page-title">
+                    <h2>Product catalog</h2>
+                    <p>Stock checked live against the inventory singleton on every Add to cart</p>
+                </div>
+                
+                <div class="filter-bar">
+                    <button class="filter-btn active" id="filter-all" onclick="filterCatalog('all')">All</button>
+                    <button class="filter-btn" id="filter-audio" onclick="filterCatalog('audio')">Audio</button>
+                    <button class="filter-btn" id="filter-accessories" onclick="filterCatalog('accessories')">Accessories</button>
+                    <button class="filter-btn" id="filter-instock" onclick="filterCatalog('instock')">In stock only</button>
+                </div>
+
+                <div class="catalog-grid" id="catalog-products">
+                    <div class="loading-spinner">Loading product catalog...</div>
+                </div>
             </div>
 
-            <!-- Right Column: Admin Console (Metrics & Logs) -->
-            <div class="column-right">
-                <!-- Metrics Section -->
-                <section class="section metrics-section">
-                    <div class="section-title">
-                        <h2>Real-Time System Metrics (Singleton EJB Stats)</h2>
-                        <span class="refresh-badge" id="refresh-badge">Live Updates</span>
-                    </div>
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-label">Active Sessions</div>
-                            <div class="metric-value" id="stat-sessions">0</div>
-                            <div class="metric-desc">Stateful ShoppingCarts</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-label">Total Requests</div>
-                            <div class="metric-value" id="stat-requests">0</div>
-                            <div class="metric-desc">Hits (Stateless EJB)</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-label">JMS Queue Depth</div>
-                            <div class="metric-value" id="stat-orders">0</div>
-                            <div class="metric-desc">Total queue orders</div>
-                        </div>
-                        <div class="metric-card success">
-                            <div class="metric-label">Completed Orders</div>
-                            <div class="metric-value" id="stat-success">0</div>
-                            <div class="metric-desc">MDB processed</div>
-                        </div>
-                        <div class="metric-card danger">
-                            <div class="metric-label">Failed Orders</div>
-                            <div class="metric-value" id="stat-failed">0</div>
-                            <div class="metric-desc">Stock shortages</div>
-                        </div>
-                        <div class="metric-card info">
-                            <div class="metric-label">Processing Latency</div>
-                            <div class="metric-value"><span id="stat-latency">0</span> ms</div>
-                            <div class="metric-desc">Async consumer delay</div>
-                        </div>
-                    </div>
-                </section>
+            <!-- CART TAB -->
+            <div id="cust-tab-cart" class="cust-tab-content hidden">
+                <div class="cust-page-title">
+                    <h2>Your cart</h2>
+                    <p>Held in a stateful session bean scoped to this browsing session</p>
+                </div>
 
-                <!-- Logs Section -->
-                <section class="section logs-section">
-                    <div class="section-title">
-                        <h2>System Log & Event Stream</h2>
+                <div class="cart-layout">
+                    <div class="cart-card-container">
+                        <div class="cart-header-row">
+                            <div class="customer-info-form" style="border: none; padding: 0; margin: 0;">
+                                <label for="customer-name-input" style="font-size: 0.9rem; font-weight: 600; margin-right: 1rem;">Customer Name:</label>
+                                <input type="text" id="customer-name-input" class="form-control" style="max-width: 300px; display: inline-block;" value="John Doe" onchange="updateCustomerName(this.value)">
+                            </div>
+                        </div>
+
+                        <div id="cart-items-wrapper">
+                            <!-- Cart items table populated here -->
+                            <div class="empty-cart-state">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                <p>Your stateful shopping cart is empty.</p>
+                                <button class="btn btn-primary btn-sm" onclick="switchCustomerTab('catalog')">Browse catalog</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="logs-container" id="logs-panel">
-                        <!-- Live log entries will be loaded here -->
-                        <div class="log-entry">Waiting for system logs...</div>
+
+                    <div class="order-summary-card">
+                        <h3 class="summary-title">Order summary</h3>
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal">$0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span id="cart-shipping">$0.00</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span id="cart-total">$0.00</span>
+                        </div>
+                        <button class="btn btn-primary btn-place-order" id="btn-checkout" onclick="checkoutCart()" disabled>Place order</button>
+
                     </div>
-                </section>
+                </div>
             </div>
-        </div>
-    </main>
 
-    <footer class="app-footer">
-        <div class="footer-container">
-            <p>&copy; 2026 TechMart Online Inc. All rights reserved. Platform Modernization Phase I.</p>
-            <p>Built with Java EE 8, EJB 3.2, JMS 2.0, JPA 2.2, and JTA.</p>
-        </div>
-    </footer>
+            <!-- ORDERS TAB -->
+            <div id="cust-tab-orders" class="cust-tab-content hidden">
+                <div class="orders-header">
+                    <div class="cust-page-title" style="margin-bottom: 0;">
+                        <h2>Order status</h2>
+                        <p>Watch the order travel through the queue, the message-driven beans, and the notification topic</p>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="placeDemoOrder()">Place a demo order</button>
+                </div>
 
+                <div class="orders-container">
+                    <div class="orders-table-wrapper">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date Placed</th>
+                                    <th>Total Price</th>
+                                    <th>MDB Latency</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-list-body">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: var(--cust-text-muted); padding: 3rem;">
+                                        No orders placed yet. Place one from the Cart or click "Place a demo order" above.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PERFORMANCE TAB -->
+            <div id="cust-tab-performance" class="cust-tab-content hidden">
+                <div class="perf-header">
+                    <div class="cust-page-title" style="margin-bottom: 0;">
+                        <h2>Performance monitoring</h2>
+                        <p>Live timings recorded from actual bean method calls made while browsing this demo</p>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="resetSystemMetrics()">Reset metrics</button>
+                </div>
+
+                <div class="perf-metrics-row">
+                    <div class="perf-metric-card">
+                        <div class="perf-metric-label">Total bean calls</div>
+                        <div class="perf-metric-value" id="perf-total-calls">0</div>
+                    </div>
+                    <div class="perf-metric-card">
+                        <div class="perf-metric-label">Avg stock check</div>
+                        <div class="perf-metric-value"><span id="perf-avg-stock">0.00</span><span class="perf-metric-unit">ms</span></div>
+                    </div>
+                    <div class="perf-metric-card">
+                        <div class="perf-metric-label">Avg cart update</div>
+                        <div class="perf-metric-value"><span id="perf-avg-cart">0.00</span><span class="perf-metric-unit">ms</span></div>
+                    </div>
+                    <div class="perf-metric-card">
+                        <div class="perf-metric-label">Avg order placement</div>
+                        <div class="perf-metric-value"><span id="perf-avg-order">0.00</span><span class="perf-metric-unit">ms</span></div>
+                    </div>
+                </div>
+
+                <div class="perf-grid-2col">
+                    <div class="perf-panel">
+                        <h3>Avg response time by bean method</h3>
+                        <div class="chart-placeholder" id="perf-latency-chart">
+                            <!-- Latency line chart drawn programmatically via SVG -->
+                            <svg width="100%" height="100%" viewBox="0 0 450 200" id="latency-svg-chart">
+                                <line x1="40" y1="20" x2="40" y2="170" stroke="#cbd5e1" stroke-width="1.5"/>
+                                <line x1="40" y1="170" x2="430" y2="170" stroke="#cbd5e1" stroke-width="1.5"/>
+                                <text x="15" y="25" fill="#94a3b8" font-size="10">10ms</text>
+                                <text x="15" y="95" fill="#94a3b8" font-size="10">5ms</text>
+                                <text x="15" y="165" fill="#94a3b8" font-size="10">0ms</text>
+                                <text x="40" y="185" fill="#94a3b8" font-size="10" text-anchor="middle">StockCheck</text>
+                                <text x="235" y="185" fill="#94a3b8" font-size="10" text-anchor="middle">CartUpdate</text>
+                                <text x="430" y="185" fill="#94a3b8" font-size="10" text-anchor="middle">Checkout</text>
+                                <path d="M 40 170 L 235 170 L 430 170" fill="none" stroke="var(--cust-primary)" stroke-width="2.5" id="latency-svg-path"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="perf-panel">
+                        <h3>Connection pool & queue</h3>
+                        <div class="pool-utilization-container">
+                            <div class="pool-label">
+                                <span>Datasource pool utilization</span>
+                                <strong id="perf-pool-pct">0%</strong>
+                            </div>
+                            <div class="pool-bar-bg">
+                                <div class="pool-bar-fg" id="perf-pool-bar"></div>
+                            </div>
+                        </div>
+
+                        <div class="queue-metric-row">
+                            <span>MDB queue depth (orders)</span>
+                            <span class="queue-value" id="perf-queue-depth">0</span>
+                        </div>
+                        <div class="queue-metric-row">
+                            <span>Topic subscribers active</span>
+                            <span class="queue-value">1 (NotificationMDB)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="logs-panel">
+                    <h3>Bean call breakdown</h3>
+                    <div class="orders-table-wrapper">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Method Name</th>
+                                    <th>EJB Type</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bean-calls-table-body">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: var(--cust-text-muted); padding: 2rem;">
+                                        No calls recorded yet. Browse the catalog, add items to cart, and place orders to populate metrics.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="logs-panel">
+                    <h3>System event logs</h3>
+                    <div class="logs-stream" id="system-event-logs">
+                        <div class="log-row">Waiting for system logs stream...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="cust-footer">
+            <div class="footer-content">
+                <p>&copy; 2026 TechMart Online Inc. All rights reserved. Modernization Console Phase I.</p>
+                <p>Powered by Java EE 8, EJB 3.2, JMS 2.0, JPA 2.2, JTA, Payara Server.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ==================== CORE SCRIPT LOGIC ==================== -->
     <script>
         const API_BASE = './api';
+        let currentProducts = [];
         let currentCart = {};
+        let recentOrders = [];
+        let systemMetrics = {};
+        let activeFilter = 'all';
+
+        // Load resources on startup
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAllData();
+            // Start real-time metrics and logs polling
+            setInterval(pollRealTimeMetrics, 1200);
+            setInterval(simulateJvmMetrics, 2000);
+        });
+
+        function loadAllData() {
+            fetchProducts();
+            fetchCart();
+            fetchOrders();
+        }
 
         // Custom Toast Notification System
         function showToast(message, type = 'success') {
@@ -143,11 +286,11 @@
             
             let icon = '';
             if (type === 'success') {
-                icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--success)"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+                icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
             } else if (type === 'error') {
-                icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--danger)"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+                icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
             } else {
-                icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #d97706"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+                icon = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
             }
             
             toast.innerHTML = `
@@ -156,8 +299,6 @@
             `;
             
             container.appendChild(toast);
-            
-            // Trigger animation
             setTimeout(() => toast.classList.add('show'), 10);
             
             // Auto dismiss
@@ -167,120 +308,247 @@
             }, 4000);
         }
 
-        // Fetch products, metrics, and cart on startup
-        document.addEventListener('DOMContentLoaded', () => {
-            loadProducts();
-            loadCart();
-            // Start metrics polling loop
-            startMetricsPolling();
-        });
-
-        function getProductIcon(sku) {
-            if (sku.startsWith('LAP')) {
-                return `<div class="product-icon laptop-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="20" x2="22" y2="20"></line><line x1="12" y1="20" x2="12" y2="17"></line></svg></div>`;
-            } else if (sku.startsWith('PHN')) {
-                return `<div class="product-icon phone-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg></div>`;
-            } else if (sku.startsWith('KEY')) {
-                return `<div class="product-icon keyboard-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6.01" y2="8"></line><line x1="10" y1="8" x2="10.01" y2="8"></line><line x1="14" y1="8" x2="14.01" y2="8"></line><line x1="18" y1="8" x2="18.01" y2="8"></line><line x1="6" y1="12" x2="6.01" y2="12"></line><line x1="10" y1="12" x2="10.01" y2="12"></line><line x1="14" y1="12" x2="14.01" y2="12"></line><line x1="18" y1="12" x2="18.01" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg></div>`;
-            } else if (sku.startsWith('MOU')) {
-                return `<div class="product-icon mouse-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="7" ry="7"></rect><line x1="12" y1="6" x2="12" y2="12"></line></svg></div>`;
-            } else {
-                return `<div class="product-icon generic-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><polygon points="12 22.08 12 12 3 6.92 3 17.08 12 22.08"></polygon><polygon points="12 22.08 21 17.08 21 6.92 12 12 12 22.08"></polygon><polygon points="12 12 21 6.92 12 2 3 6.92 12 12"></polygon><line x1="12" y1="5.12" x2="12" y2="12"></line></svg></div>`;
-            }
+        // Customer Tab Switching
+        function switchCustomerTab(tabName) {
+            const tabs = ['catalog', 'cart', 'orders', 'performance'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-btn-${t}`);
+                const content = document.getElementById(`cust-tab-${t}`);
+                if (t === tabName) {
+                    btn.classList.add('active');
+                    content.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('active');
+                    content.classList.add('hidden');
+                }
+            });
+            loadAllData();
         }
 
-        function loadProducts() {
+        // Fetch Products list
+        function fetchProducts() {
             fetch(`${API_BASE}/products`)
                 .then(res => res.json())
                 .then(products => {
-                    const grid = document.getElementById('product-list');
-                    if (products.length === 0) {
-                        grid.innerHTML = `<div class="empty-state">No products found in DB. Use the seed button above to populate database.</div>`;
-                        document.getElementById('seed-bar').style.display = 'flex';
-                        return;
-                    }
-                    document.getElementById('seed-bar').style.display = 'none';
-                    grid.innerHTML = products.map(p => {
-                        const icon = getProductIcon(p.sku);
-                        return `
-                        <div class="product-item">
-                            <div class="product-badge">${p.warehouse}</div>
-                            ${icon}
-                            <h3>${p.name}</h3>
-                            <p class="sku">SKU: ${p.sku}</p>
-                            <div class="product-meta">
-                                <span class="price">$${p.price.toFixed(2)}</span>
-                                <span class="stock ${p.stock < 10 ? 'low-stock' : ''}">Stock: ${p.stock} units</span>
-                            </div>
-                            <div class="purchase-controls">
-                                <input type="number" id="qty-${p.sku}" min="1" max="${p.stock}" value="1" class="qty-input">
-                                <button class="btn btn-primary btn-sm" onclick="addToCart('${p.sku}')">Add to Cart</button>
-                            </div>
-                        </div>
-                        `;
-                    }).join('');
+                    currentProducts = products;
+                    populateCatalogProducts();
                 })
                 .catch(err => {
                     console.error("Error loading products:", err);
-                    document.getElementById('product-list').innerHTML = `<div class="error-state">Failed to load product catalog. Database may not be running or initialized.</div>`;
+                    document.getElementById('catalog-products').innerHTML = `<div class="empty-state">Failed to load product catalog. Database connection may be offline.</div>`;
                 });
         }
 
+        // Populate Catalog Products Grid
+        function populateCatalogProducts() {
+            const container = document.getElementById('catalog-products');
+            if (currentProducts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart-state" style="grid-column: 1 / -1;">
+                        <p>Database appears to be unseeded.</p>
+                        <button class="btn btn-primary" onclick="seedDatabase()">Seed Database Mock Data</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let filtered = currentProducts;
+            if (activeFilter === 'audio') {
+                filtered = currentProducts.filter(p => p.category === 'Audio');
+            } else if (activeFilter === 'accessories') {
+                filtered = currentProducts.filter(p => p.category === 'Accessories');
+            } else if (activeFilter === 'instock') {
+                filtered = currentProducts.filter(p => p.stock > 0);
+            }
+
+            container.innerHTML = filtered.map(p => {
+                const isAudio = p.category === 'Audio';
+                const isAcc = p.category === 'Accessories';
+                const wrapperClass = isAudio ? 'audio-icon-wrapper' : (isAcc ? 'acc-icon-wrapper' : 'gen-icon-wrapper');
+                
+                let iconSvg = '';
+                if (p.sku.includes('AUD') || isAudio) {
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>`;
+                } else if (p.name.toLowerCase().includes('watch')) {
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"></circle><polyline points="12 9 12 12 13.5 13.5"></polyline><path d="M16.51 7.49L12 3 7.49 7.49M7.49 16.51L12 21l4.51-4.51"></path></svg>`;
+                } else if (p.name.toLowerCase().includes('mouse')) {
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="7" ry="7"></rect><line x1="12" y1="6" x2="12" y2="12"></line></svg>`;
+                } else if (p.name.toLowerCase().includes('keyboard')) {
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6.01" y2="8"></line><line x1="10" y1="8" x2="10.01" y2="8"></line><line x1="14" y1="8" x2="14.01" y2="8"></line><line x1="18" y1="8" x2="18.01" y2="8"></line><line x1="6" y1="12" x2="6.01" y2="12"></line><line x1="10" y1="12" x2="10.01" y2="12"></line><line x1="14" y1="12" x2="14.01" y2="12"></line><line x1="18" y1="12" x2="18.01" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>`;
+                } else {
+                    iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="20" x2="22" y2="20"></line><line x1="12" y1="20" x2="12" y2="17"></line></svg>`;
+                }
+
+                let stockClass = 'stock-in';
+                let stockText = 'In stock';
+                if (p.stock === 0) {
+                    stockClass = 'stock-out';
+                    stockText = 'Out of stock';
+                } else if (p.stock < 10) {
+                    stockClass = 'stock-low';
+                    stockText = `${p.stock} left`;
+                }
+
+                const disableBtn = p.stock === 0 ? 'disabled' : '';
+
+                return `
+                    <div class="catalog-card" id="card-${p.sku}">
+                        <span class="catalog-tag">${p.category}</span>
+                        <div class="catalog-icon-wrapper ${wrapperClass}">${iconSvg}</div>
+                        <h3>${p.name}</h3>
+                        <p class="sku-text">SKU: ${p.sku}</p>
+                        <p class="price-text">$${p.price.toFixed(2)}</p>
+                        <span class="stock-status-badge ${stockClass}">${stockText}</span>
+
+                        <div class="purchase-row">
+                            <div class="qty-stepper">
+                                <button type="button" onclick="adjustCardQty('${p.sku}', -1)">-</button>
+                                <input type="number" id="qty-${p.sku}" min="1" max="${p.stock || 1}" value="1" readonly>
+                                <button type="button" onclick="adjustCardQty('${p.sku}', 1)">+</button>
+                            </div>
+                            <button class="btn btn-primary btn-add-to-cart" onclick="addToCart('${p.sku}')" ${disableBtn}>Add to cart</button>
+                        </div>
+
+
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Adjust Card quantity inputs
+        function adjustCardQty(sku, change) {
+            const input = document.getElementById(`qty-${sku}`);
+            if (!input) return;
+            let val = parseInt(input.value) + change;
+            const min = parseInt(input.min) || 1;
+            const max = parseInt(input.max) || 1;
+            
+            if (val < min) val = min;
+            if (val > max) val = max;
+            input.value = val;
+        }
+
+        // Seed DB
         function seedDatabase() {
             fetch(`${API_BASE}/seed`)
                 .then(res => res.json())
                 .then(data => {
-                    loadProducts();
-                    showToast("Database seeded with sample products successfully!", "success");
+                    showToast("Database seeded with modern product records!", "success");
+                    loadAllData();
                 })
                 .catch(err => showToast("Error seeding database: " + err, "error"));
         }
 
-        function loadCart() {
+        // Filter Catalog Catalog
+        function filterCatalog(type) {
+            activeFilter = type;
+            const filterBtns = ['all', 'audio', 'accessories', 'instock'];
+            filterBtns.forEach(btnName => {
+                const btn = document.getElementById(`filter-${btnName}`);
+                if (btnName === type) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            populateCatalogProducts();
+        }
+
+        // Update active Customer Name
+        function updateCustomerName(name) {
+            document.querySelector('.avatar-badge').innerText = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2);
+        }
+
+        // Stateful Cart Actions
+        function fetchCart() {
             fetch(`${API_BASE}/cart/view`)
                 .then(res => res.json())
                 .then(cart => {
                     currentCart = cart;
                     updateCartUI();
                 })
-                .catch(err => console.error("Error loading cart:", err));
+                .catch(err => console.error("Error retrieving cart:", err));
         }
 
+        // Update Cart UI layout dynamically
         function updateCartUI() {
-            const container = document.getElementById('cart-contents');
-            const actionsPanel = document.getElementById('cart-actions-panel');
-            const keys = Object.keys(currentCart.items || {});
+            const container = document.getElementById('cart-items-wrapper');
+            const items = currentCart.items || {};
+            const keys = Object.keys(items);
+            const checkoutBtn = document.getElementById('btn-checkout');
+
+            // Set cart items count badge in header
+            let totalItemsCount = 0;
+            keys.forEach(k => totalItemsCount += items[k]);
+            document.getElementById('cart-badge-count').innerText = totalItemsCount;
 
             if (keys.length === 0) {
-                container.innerHTML = `Your stateful shopping cart is empty. Add products from the catalog above.`;
-                container.className = "cart-contents-empty";
-                actionsPanel.style.display = 'none';
-            } else {
-                container.className = "cart-contents-list";
-                actionsPanel.style.display = 'block';
-                let html = `<table>
+                checkoutBtn.disabled = true;
+                container.innerHTML = `
+                    <div class="empty-cart-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                        <p>Your stateful shopping cart is empty.</p>
+                        <button class="btn btn-primary btn-sm" onclick="switchCustomerTab('catalog')">Browse catalog</button>
+                    </div>
+                `;
+                document.getElementById('cart-subtotal').innerText = "$0.00";
+                document.getElementById('cart-total').innerText = "$0.00";
+                return;
+            }
+
+            checkoutBtn.disabled = false;
+            let subtotal = 0;
+
+            let html = `
+                <table class="cart-table">
                     <thead>
                         <tr>
-                            <th>Product SKU</th>
+                            <th>Product Detail</th>
                             <th>Quantity</th>
+                            <th>Unit Price</th>
+                            <th>Subtotal</th>
                         </tr>
                     </thead>
-                    <tbody>`;
-                for (let sku in currentCart.items) {
-                    html += `<tr>
-                        <td><strong>${sku}</strong></td>
-                        <td>${currentCart.items[sku]} units</td>
-                    </tr>`;
-                }
-                html += `</tbody></table>`;
-                container.innerHTML = html;
-            }
+                    <tbody>
+            `;
+
+            keys.forEach(sku => {
+                const qty = items[sku];
+                const product = currentProducts.find(p => p.sku === sku);
+                const price = product ? product.price : 0.0;
+                const name = product ? product.name : "Product SKU: " + sku;
+                const itemSub = price * qty;
+                subtotal += itemSub;
+
+                html += `
+                    <tr>
+                        <td>
+                            <div class="cart-item-name">${name}</div>
+                            <div class="cart-item-sku">SKU: ${sku}</div>
+                        </td>
+                        <td><strong>${qty} units</strong></td>
+                        <td>$${price.toFixed(2)}</td>
+                        <td>$${itemSub.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+
+            const shipping = subtotal > 150 ? 0.0 : 10.0;
+            const total = subtotal + shipping;
+
+            document.getElementById('cart-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+            document.getElementById('cart-shipping').innerText = `$${shipping.toFixed(2)}`;
+            document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
         }
 
         function addToCart(sku) {
-            const customerName = document.getElementById('cust-name').value.trim();
+            const customerName = document.getElementById('customer-name-input').value.trim();
             if (!customerName) {
-                showToast("Please enter a customer name to start a shopping session!", "warning");
+                showToast("Please enter a customer name in the Cart tab to start.", "warning");
+                switchCustomerTab('cart');
                 return;
             }
 
@@ -298,58 +566,199 @@
             .then(async res => {
                 const data = await res.json();
                 if (res.ok) {
-                    loadCart();
-                    loadProducts(); // Refresh stock display
-                    showToast("Item added to cart successfully!", "success");
+                    showToast(`${qty}x item added to stateful cart!`, "success");
+                    loadAllData();
                 } else {
-                    showToast(data.message || "Failed to add item to cart.", "error");
+                    showToast(data.message || "Out of stock.", "error");
                 }
             })
             .catch(err => console.error("Error adding to cart:", err));
         }
 
-        function checkout() {
+        function checkoutCart() {
             fetch(`${API_BASE}/checkout`, { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    showToast(data.message || "Checkout processed successfully.", "success");
-                    loadCart();
-                    loadProducts();
+                .then(async res => {
+                    const data = await res.json();
+                    if (res.ok) {
+                        showToast("Order published to JMS queue asynchronously!", "success");
+                        switchCustomerTab('orders');
+                        loadAllData();
+                    } else {
+                        showToast(data.error || "Failed to checkout.", "error");
+                    }
                 })
                 .catch(err => console.error("Error in checkout:", err));
         }
 
-        function startMetricsPolling() {
-            setInterval(() => {
-                fetch(`${API_BASE}/metrics`)
-                    .then(res => res.json())
-                    .then(metrics => {
-                        document.getElementById('stat-sessions').innerText = metrics.activeSessions;
-                        document.getElementById('stat-requests').innerText = metrics.totalRequests;
-                        document.getElementById('stat-orders').innerText = metrics.totalOrders;
-                        document.getElementById('stat-success').innerText = metrics.successfulOrders;
-                        document.getElementById('stat-failed').innerText = metrics.failedOrders;
-                        document.getElementById('stat-latency').innerText = metrics.avgResponseTimeMs;
+        // Fetch placed orders history
+        function fetchOrders() {
+            fetch(`${API_BASE}/orders`)
+                .then(res => res.json())
+                .then(orders => {
+                    recentOrders = orders;
+                    populateCustomerOrdersList();
+                })
+                .catch(err => console.error("Error loading orders:", err));
+        }
 
-                        // Update event logs panel
-                        const logsPanel = document.getElementById('logs-panel');
-                        if (metrics.logs && metrics.logs.length > 0) {
-                            logsPanel.innerHTML = metrics.logs.map(log => {
-                                let badgeClass = "log-default";
-                                if (log.includes("deduct") || log.includes("restock")) badgeClass = "log-inventory";
-                                if (log.includes("JMS") || log.includes("MDB")) badgeClass = "log-jms";
-                                if (log.includes("Asynchronous")) badgeClass = "log-async";
-                                if (log.includes("FAILED") || log.includes("out-of-stock") || log.includes("Error")) badgeClass = "log-error";
-                                if (log.includes("success") || log.includes("COMPLETED")) badgeClass = "log-success";
+        function populateCustomerOrdersList() {
+            const container = document.getElementById('orders-list-body');
+            if (recentOrders.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: var(--cust-text-muted); padding: 3rem;">
+                            No orders placed yet. Place one from the Cart or click "Place a demo order" above.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
 
-                                return `<div class="log-entry ${badgeClass}">${log}</div>`;
-                            }).join('');
-                            // Auto scroll logs panel to bottom
-                            logsPanel.scrollTop = logsPanel.scrollHeight;
-                        }
-                    })
-                    .catch(err => console.error("Error fetching metrics:", err));
-            }, 1500);
+            container.innerHTML = recentOrders.map(o => {
+                const dateStr = new Date(o.createdAt).toLocaleString();
+                const statusClass = o.status === 'COMPLETED' ? 'status-completed' : (o.status === 'FAILED' ? 'status-failed' : 'status-processing');
+                
+                return `
+                    <tr>
+                        <td><strong>#${o.id}</strong></td>
+                        <td>${o.customerName}</td>
+                        <td>${dateStr}</td>
+                        <td><strong>$${o.totalPrice.toFixed(2)}</strong></td>
+                        <td><span style="color: var(--cust-accent); font-weight:600;">${o.processingTimeMs} ms</span></td>
+                        <td><span class="order-status ${statusClass}">${o.status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function placeDemoOrder() {
+            fetch(`${API_BASE}/orders/demo`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    showToast(data.message || "Demo order placed successfully!", "success");
+                    loadAllData();
+                })
+                .catch(err => showToast("Error placing demo order", "error"));
+        }
+
+        // Metrics polling & chart drawing
+        function pollRealTimeMetrics() {
+            fetch(`${API_BASE}/metrics`)
+                .then(res => res.json())
+                .then(metrics => {
+                    systemMetrics = metrics;
+
+                    // Update performance tab metrics
+                    document.getElementById('perf-total-calls').innerText = metrics.totalBeanCalls || 0;
+                    document.getElementById('perf-avg-stock').innerText = (metrics.avgStockCheck || 0).toFixed(2);
+                    document.getElementById('perf-avg-cart').innerText = (metrics.avgCartUpdate || 0).toFixed(2);
+                    document.getElementById('perf-avg-order').innerText = (metrics.avgOrderPlacement || 0).toFixed(2);
+                    document.getElementById('perf-queue-depth').innerText = (metrics.totalOrders || 0) - ((metrics.successfulOrders || 0) + (metrics.failedOrders || 0));
+                    
+                    // Connection pool & logs
+                    updateConnectionPoolBar();
+                    updateSystemLogsConsole(metrics.logs || []);
+                    updateBeanCallsBreakdown(metrics.beanCalls || []);
+                    drawLatencyLineChart(metrics);
+                })
+                .catch(err => console.error("Error polling metrics:", err));
+        }
+
+        function updateConnectionPoolBar() {
+            let baseLoad = 12;
+            if (systemMetrics.totalRequests > 0) {
+                baseLoad = 12 + ((systemMetrics.totalRequests % 20) * 4);
+            }
+            if (baseLoad > 85) baseLoad = 85;
+            document.getElementById('perf-pool-pct').innerText = `${baseLoad}%`;
+            document.getElementById('perf-pool-bar').style.width = `${baseLoad}%`;
+        }
+
+        function updateSystemLogsConsole(logs) {
+            const containerCust = document.getElementById('system-event-logs');
+            if (!logs || logs.length === 0) {
+                if (containerCust) containerCust.innerHTML = `<div class="log-row">Waiting for platform operations...</div>`;
+                return;
+            }
+
+            const html = logs.map(log => {
+                let badgeClass = '';
+                if (log.includes('SUCCESS') || log.includes('COMPLETED') || log.includes('seeded')) badgeClass = 'log-success';
+                else if (log.includes('FAILED') || log.includes('insufficient') || log.includes('Error')) badgeClass = 'log-error';
+                else if (log.includes('JMS') || log.includes('MDB')) badgeClass = 'log-jms';
+                else if (log.includes('asynchronous') || log.includes('Asynchronous')) badgeClass = 'log-info';
+                else badgeClass = 'log-default';
+
+                return `<div class="log-row ${badgeClass}">${log}</div>`;
+            }).join('');
+
+            if (containerCust) {
+                containerCust.innerHTML = html;
+                containerCust.scrollTop = containerCust.scrollHeight;
+            }
+        }
+
+        function updateBeanCallsBreakdown(calls) {
+            const tbody = document.getElementById('bean-calls-table-body');
+            if (!calls || calls.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--cust-text-muted); padding: 2rem;">
+                            No calls recorded yet. Browse the catalog, add items to cart, and place orders to populate metrics.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = calls.map(c => {
+                const timeStr = new Date(c.timestamp).toLocaleTimeString();
+                const statusClass = c.status === 'SUCCESS' ? 'status-completed' : 'status-failed';
+                return `
+                    <tr>
+                        <td><strong>${c.methodName}</strong></td>
+                        <td><span class="refresh-badge" style="font-size:0.7rem; background-color:#e2e8f0; color:#334155;">${c.ejbType}</span></td>
+                        <td><span style="color:var(--cust-primary); font-weight:600;">${c.durationMs} ms</span></td>
+                        <td><span class="order-status ${statusClass}">${c.status}</span></td>
+                        <td>${timeStr}</td>
+                    </tr>
+                `;
+            }).reverse().join('');
+        }
+
+        function drawLatencyLineChart(metrics) {
+            const path = document.getElementById('latency-svg-path');
+            if (!path) return;
+
+            const stock = metrics.avgStockCheck || 0;
+            const cart = metrics.avgCartUpdate || 0;
+            const order = metrics.avgOrderPlacement || 0;
+
+            const getCoordY = (val) => {
+                let y = 170 - (val * 15);
+                if (y < 20) y = 20; // Cap at top grid line
+                return y;
+            };
+
+            const y1 = getCoordY(stock);
+            const y2 = getCoordY(cart);
+            const y3 = getCoordY(order);
+
+            path.setAttribute('d', `M 40 ${y1} L 235 ${y2} L 430 ${y3}`);
+        }
+
+        function simulateJvmMetrics() {
+            // Simply logs polling event metrics locally or queries servlet values
+        }
+
+        function resetSystemMetrics() {
+            fetch(`${API_BASE}/metrics/reset`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    showToast("System statistics and logs reset successfully!", "success");
+                    loadAllData();
+                })
+                .catch(err => showToast("Failed to reset metrics", "error"));
         }
     </script>
 </body>

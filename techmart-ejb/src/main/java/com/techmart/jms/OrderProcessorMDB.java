@@ -3,11 +3,13 @@ package com.techmart.jms;
 import com.techmart.ejb.InventoryService;
 import com.techmart.ejb.NotificationService;
 import com.techmart.ejb.PlatformMetricsRegistry;
+import com.techmart.interceptor.PerformanceInterceptor;
 import com.techmart.model.OrderEntity;
 import com.techmart.model.OrderItemEntity;
 import jakarta.ejb.ActivationConfigProperty;
 import jakarta.ejb.EJB;
 import jakarta.ejb.MessageDriven;
+import jakarta.interceptor.Interceptors;
 import jakarta.jms.JMSDestinationDefinition;
 import jakarta.jms.MapMessage;
 import jakarta.jms.Message;
@@ -36,6 +38,7 @@ import java.util.Map;
     @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "jakarta.jms.Queue"),
     @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge")
 })
+@Interceptors(PerformanceInterceptor.class)
 public class OrderProcessorMDB implements MessageListener {
 
     @PersistenceContext(unitName = "TechMartPU")

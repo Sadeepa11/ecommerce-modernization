@@ -1,14 +1,19 @@
 package com.techmart.ejb;
 
 import com.techmart.model.Product;
+import com.techmart.model.OrderEntity;
+import com.techmart.interceptor.PerformanceInterceptor;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.interceptor.Interceptors;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.List;
 
 @Stateless
+@Interceptors(PerformanceInterceptor.class)
 public class InventoryService {
 
     @PersistenceContext(unitName = "TechMartPU")
@@ -78,5 +83,29 @@ public class InventoryService {
     public void createProduct(Product product) {
         em.persist(product);
         metrics.addLog("New product created: " + product.getName() + " (SKU: " + product.getSku() + ")");
+    }
+
+    public void updateProduct(String sku, String name, int stock, double price, String warehouseLocation, String category) {
+        Product product = getProductBySku(sku);
+        if (product != null) {
+            product.setName(name);
+            product.setStock(stock);
+            product.setPrice(price);
+            product.setWarehouseLocation(warehouseLocation);
+            product.setCategory(category);
+            em.merge(product);
+            metrics.addLog("Product updated: " + name + " (SKU: " + sku + ")");
+        } else {
+            metrics.addLog("Failed to update product SKU: " + sku + ". SKU not found.");
+        }
+    }
+
+    public List<OrderEntity> getAllOrders() {
+        try {
+            return em.createQuery("SELECT o FROM OrderEntity o ORDER BY o.createdAt DESC", OrderEntity.class).getResultList();
+        } catch (Exception e) {
+            metrics.addLog("Error retrieving orders from DB: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 }

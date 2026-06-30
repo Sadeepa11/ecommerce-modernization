@@ -27,6 +27,9 @@ public class Product implements Serializable {
     @Column(name = "warehouse_location")
     private String warehouseLocation;
 
+    @Column(name = "category")
+    private String category;
+
     public Product() {}
 
     public Product(String sku, String name, Integer stock, Double price, String warehouseLocation) {
@@ -35,6 +38,16 @@ public class Product implements Serializable {
         this.stock = stock;
         this.price = price;
         this.warehouseLocation = warehouseLocation;
+        this.category = "General";
+    }
+
+    public Product(String sku, String name, Integer stock, Double price, String warehouseLocation, String category) {
+        this.sku = sku;
+        this.name = name;
+        this.stock = stock;
+        this.price = price;
+        this.warehouseLocation = warehouseLocation;
+        this.category = category;
     }
 
     // Getters and Setters
@@ -84,5 +97,13 @@ public class Product implements Serializable {
 
     public void setWarehouseLocation(String warehouseLocation) {
         this.warehouseLocation = warehouseLocation;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
