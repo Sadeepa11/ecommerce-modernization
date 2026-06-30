@@ -1,10 +1,12 @@
 package com.techmart.ejb;
 
+import com.techmart.interceptor.PerformanceInterceptor;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateful;
 import jakarta.ejb.StatefulTimeout;
+import jakarta.interceptor.Interceptors;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 @Stateful
 @StatefulTimeout(value = 20, unit = TimeUnit.MINUTES)
+@Interceptors(PerformanceInterceptor.class)
 public class ShoppingCartSession implements Serializable {
     private static final long serialVersionUID = 1L;
 

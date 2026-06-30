@@ -5,6 +5,8 @@ import com.techmart.ejb.PlatformMetricsRegistry;
 import com.techmart.ejb.ShoppingCartSession;
 import com.techmart.jms.OrderProcessingProducer;
 import com.techmart.model.Product;
+import com.techmart.model.OrderEntity;
+import com.techmart.model.BeanCallRecord;
 import jakarta.ejb.EJB;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -22,19 +24,22 @@ import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
 
-
 @WebServlet(name = "PlatformControllerServlet", urlPatterns = {
     "/api/products",
     "/api/cart/add",
     "/api/cart/view",
     "/api/checkout",
     "/api/metrics",
-    "/api/seed"
+    "/api/seed",
+    "/api/orders",
+    "/api/orders/demo",
+    "/api/metrics/reset",
+    "/api/admin/products/update",
+    "/api/admin/products/create"
 })
 public class PlatformControllerServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    // Use Dependency Injection (@EJB) for Stateless and Singleton EJBs
     @EJB
     private InventoryService inventoryService;
 
@@ -44,14 +49,11 @@ public class PlatformControllerServlet extends HttpServlet {
     @EJB
     private OrderProcessingProducer orderProducer;
 
-    // Retrieve Stateful EJB instance from Session or JNDI Lookup
     private ShoppingCartSession getOrCreateCartSession(HttpServletRequest request) throws NamingException {
         HttpSession httpSession = request.getSession(true);
         ShoppingCartSession cart = (ShoppingCartSession) httpSession.getAttribute("cart_ejb");
         if (cart == null) {
-            // Demonstrating JNDI Lookup for EJB component lookup as requested in assignment
             InitialContext ic = new InitialContext();
-            // Standard portable EJB JNDI name
             cart = (ShoppingCartSession) ic.lookup("java:app/techmart-ejb/ShoppingCartSession");
             httpSession.setAttribute("cart_ejb", cart);
         }
@@ -80,6 +82,9 @@ public class PlatformControllerServlet extends HttpServlet {
             } else if ("/api/seed".equals(path)) {
                 seedDatabase();
                 out.print("{\"status\":\"success\", \"message\":\"Database seeded with sample products.\"}");
+            } else if ("/api/orders".equals(path)) {
+                List<OrderEntity> orders = inventoryService.getAllOrders();
+                out.print(toJsonOrders(orders));
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 out.print("{\"error\":\"Invalid endpoint\"}");
@@ -116,7 +121,6 @@ public class PlatformControllerServlet extends HttpServlet {
                 ShoppingCartSession cart = getOrCreateCartSession(request);
                 cart.setCustomerName(customerName);
                 
-                // Verify availability first (using Stateless session bean)
                 boolean available = inventoryService.checkAvailability(sku, qty);
                 if (available) {
                     cart.addItem(sku, qty);
@@ -137,7 +141,6 @@ public class PlatformControllerServlet extends HttpServlet {
                     return;
                 }
 
-                // Build a JSON array of the order items
                 JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
                 for (Map.Entry<String, Integer> entry : items.entrySet()) {
                     Product product = inventoryService.getProductBySku(entry.getKey());
@@ -150,11 +153,78 @@ public class PlatformControllerServlet extends HttpServlet {
                 }
                 String itemsJson = arrayBuilder.build().toString();
 
-                // Send a single JMS message for the entire checkout order
                 orderProducer.sendOrderMessage(customer, itemsJson);
-
                 cart.clearCart();
                 out.print("{\"status\":\"success\", \"message\":\"Order placed successfully in JMS queue! Processing asynchronously.\"}");
+
+            } else if ("/api/orders/demo".equals(path)) {
+                List<Product> products = inventoryService.getAllProducts();
+                if (products.isEmpty()) {
+                    seedDatabase();
+                    products = inventoryService.getAllProducts();
+                }
+
+                if (products.isEmpty()) {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    out.print("{\"error\":\"No products available to create demo order.\"}");
+                    return;
+                }
+
+                // Pick a random product
+                Product p = products.get((int) (Math.random() * products.size()));
+                int qty = (int) (Math.random() * 3) + 1; // 1 to 3
+
+                JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+                JsonObjectBuilder item = Json.createObjectBuilder()
+                    .add("sku", p.getSku())
+                    .add("quantity", qty)
+                    .add("price", p.getPrice());
+                arrayBuilder.add(item);
+
+                String customer = "Demo Customer " + ((int)(Math.random() * 100) + 1);
+                orderProducer.sendOrderMessage(customer, arrayBuilder.build().toString());
+
+                out.print("{\"status\":\"success\", \"message\":\"Demo order for " + customer + " placed in JMS queue.\"}");
+
+            } else if ("/api/metrics/reset".equals(path)) {
+                metricsRegistry.resetMetrics();
+                out.print("{\"status\":\"success\", \"message\":\"System metrics reset successfully.\"}");
+
+            } else if ("/api/admin/products/update".equals(path)) {
+                String sku = request.getParameter("sku");
+                String name = request.getParameter("name");
+                int stock = Integer.parseInt(request.getParameter("stock"));
+                double price = Double.parseDouble(request.getParameter("price"));
+                String warehouse = request.getParameter("warehouse");
+                String category = request.getParameter("category");
+
+                if (sku == null || name == null || warehouse == null || category == null) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.print("{\"error\":\"Missing required parameters for product update\"}");
+                    return;
+                }
+
+                inventoryService.updateProduct(sku, name, stock, price, warehouse, category);
+                out.print("{\"status\":\"success\", \"message\":\"Product updated successfully.\"}");
+
+            } else if ("/api/admin/products/create".equals(path)) {
+                String sku = request.getParameter("sku");
+                String name = request.getParameter("name");
+                int stock = Integer.parseInt(request.getParameter("stock"));
+                double price = Double.parseDouble(request.getParameter("price"));
+                String warehouse = request.getParameter("warehouse");
+                String category = request.getParameter("category");
+
+                if (sku == null || name == null || warehouse == null || category == null) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.print("{\"error\":\"Missing required parameters for product creation\"}");
+                    return;
+                }
+
+                Product p = new Product(sku, name, stock, price, warehouse, category);
+                inventoryService.createProduct(p);
+                out.print("{\"status\":\"success\", \"message\":\"Product created successfully.\"}");
+
             } else {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 out.print("{\"error\":\"Invalid endpoint\"}");
@@ -168,21 +238,22 @@ public class PlatformControllerServlet extends HttpServlet {
 
     private void seedDatabase() {
         if (inventoryService.getAllProducts().isEmpty()) {
-            inventoryService.createProduct(new Product("LAP-01", "Developer Enterprise Laptop", 50, 1200.00, "Warehouse A"));
-            inventoryService.createProduct(new Product("PHN-02", "Smart Mobile Phone Pro", 120, 800.00, "Warehouse B"));
-            inventoryService.createProduct(new Product("KEY-03", "Mechanical RGB Keyboard", 200, 150.00, "Warehouse A"));
-            inventoryService.createProduct(new Product("MOU-04", "Wireless Ergonomic Mouse", 150, 75.00, "Warehouse C"));
+            inventoryService.createProduct(new Product("AUD-01", "Wireless headphones", 50, 79.99, "Warehouse A", "Audio"));
+            inventoryService.createProduct(new Product("ACC-01", "Smart watch", 3, 149.00, "Warehouse B", "Accessories"));
+            inventoryService.createProduct(new Product("ACC-02", "Wireless mouse", 100, 29.99, "Warehouse C", "Accessories"));
+            inventoryService.createProduct(new Product("ACC-03", "Mechanical keyboard", 120, 89.50, "Warehouse A", "Accessories"));
+            inventoryService.createProduct(new Product("AUD-02", "Bluetooth speaker", 0, 59.00, "Warehouse B", "Audio"));
+            inventoryService.createProduct(new Product("ACC-04", "4K webcam", 80, 64.99, "Warehouse C", "Accessories"));
             metricsRegistry.addLog("Database seeded with sample product records.");
         }
     }
 
-    // JSON Helper formatters
     private String toJsonProducts(List<Product> products) {
         StringBuilder json = new StringBuilder("[");
         for (int i = 0; i < products.size(); i++) {
             Product p = products.get(i);
-            json.append(String.format("{\"id\":%d,\"sku\":\"%s\",\"name\":\"%s\",\"stock\":%d,\"price\":%.2f,\"warehouse\":\"%s\"}",
-                    p.getId(), p.getSku(), p.getName(), p.getStock(), p.getPrice(), p.getWarehouseLocation()));
+            json.append(String.format("{\"id\":%d,\"sku\":\"%s\",\"name\":\"%s\",\"stock\":%d,\"price\":%.2f,\"warehouse\":\"%s\",\"category\":\"%s\"}",
+                    p.getId(), p.getSku(), p.getName(), p.getStock(), p.getPrice(), p.getWarehouseLocation(), p.getCategory()));
             if (i < products.size() - 1) json.append(",");
         }
         json.append("]");
@@ -190,7 +261,7 @@ public class PlatformControllerServlet extends HttpServlet {
     }
 
     private String toJsonCart(ShoppingCartSession cart) {
-        StringBuilder json = new StringBuilder("{\"customerName\":\"" + cart.getCustomerName() + "\",\"items\":{");
+        StringBuilder json = new StringBuilder("{\"customerName\":\"" + (cart.getCustomerName() != null ? cart.getCustomerName() : "") + "\",\"items\":{");
         Map<String, Integer> items = cart.getCartItems();
         int count = 0;
         for (Map.Entry<String, Integer> entry : items.entrySet()) {
@@ -198,6 +269,24 @@ public class PlatformControllerServlet extends HttpServlet {
             if (++count < items.size()) json.append(",");
         }
         json.append("}}");
+        return json.toString();
+    }
+
+    private String toJsonOrders(List<OrderEntity> orders) {
+        StringBuilder json = new StringBuilder("[");
+        for (int i = 0; i < orders.size(); i++) {
+            OrderEntity o = orders.get(i);
+            String customerName = o.getCustomerName() != null ? o.getCustomerName().replace("\"", "\\\"") : "Guest";
+            double totalPrice = o.getTotalPrice() != null ? o.getTotalPrice() : 0.0;
+            String status = o.getStatus() != null ? o.getStatus() : "PENDING";
+            long processingTimeMs = o.getProcessingTimeMs() != null ? o.getProcessingTimeMs() : 0L;
+            String dateStr = o.getCreatedAt() != null ? o.getCreatedAt().toString() : "";
+            
+            json.append(String.format("{\"id\":%d,\"customerName\":\"%s\",\"totalPrice\":%.2f,\"status\":\"%s\",\"processingTimeMs\":%d,\"createdAt\":\"%s\"}",
+                    o.getId(), customerName, totalPrice, status, processingTimeMs, dateStr));
+            if (i < orders.size() - 1) json.append(",");
+        }
+        json.append("]");
         return json.toString();
     }
 
@@ -210,13 +299,28 @@ public class PlatformControllerServlet extends HttpServlet {
         }
         logsJson.append("]");
 
-        return String.format("{\"totalRequests\":%d,\"totalOrders\":%d,\"successfulOrders\":%d,\"failedOrders\":%d,\"avgResponseTimeMs\":%d,\"activeSessions\":%d,\"logs\":%s}",
+        StringBuilder callsJson = new StringBuilder("[");
+        List<BeanCallRecord> calls = metricsRegistry.getBeanCalls();
+        for (int i = 0; i < calls.size(); i++) {
+            BeanCallRecord c = calls.get(i);
+            callsJson.append(String.format("{\"methodName\":\"%s\",\"ejbType\":\"%s\",\"durationMs\":%d,\"status\":\"%s\",\"timestamp\":%d}",
+                    c.getMethodName(), c.getEjbType(), c.getDurationMs(), c.getStatus(), c.getTimestamp()));
+            if (i < calls.size() - 1) callsJson.append(",");
+        }
+        callsJson.append("]");
+
+        return String.format("{\"totalRequests\":%d,\"totalOrders\":%d,\"successfulOrders\":%d,\"failedOrders\":%d,\"avgResponseTimeMs\":%d,\"activeSessions\":%d,\"logs\":%s,\"totalBeanCalls\":%d,\"avgStockCheck\":%.2f,\"avgCartUpdate\":%.2f,\"avgOrderPlacement\":%.2f,\"beanCalls\":%s}",
                 metricsRegistry.getTotalRequests(),
                 metricsRegistry.getTotalOrders(),
                 metricsRegistry.getSuccessfulOrders(),
                 metricsRegistry.getFailedOrders(),
                 metricsRegistry.getAverageResponseTimeMs(),
                 metricsRegistry.getActiveSessions(),
-                logsJson.toString());
+                logsJson.toString(),
+                metricsRegistry.getTotalBeanCalls(),
+                metricsRegistry.getAvgStockCheckTimeMs(),
+                metricsRegistry.getAvgCartUpdateTimeMs(),
+                metricsRegistry.getAvgOrderPlacementTimeMs(),
+                callsJson.toString());
     }
 }

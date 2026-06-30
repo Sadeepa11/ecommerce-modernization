@@ -1,10 +1,12 @@
 package com.techmart.jms;
 
 import com.techmart.ejb.PlatformMetricsRegistry;
+import com.techmart.interceptor.PerformanceInterceptor;
 import jakarta.annotation.Resource;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+import jakarta.interceptor.Interceptors;
 import jakarta.jms.JMSContext;
 import jakarta.jms.JMSDestinationDefinition;
 import jakarta.jms.JMSProducer;
@@ -17,6 +19,7 @@ import jakarta.jms.Queue;
     destinationName = "OrderQueue"
 )
 @Stateless
+@Interceptors(PerformanceInterceptor.class)
 public class OrderProcessingProducer {
 
     @Inject
