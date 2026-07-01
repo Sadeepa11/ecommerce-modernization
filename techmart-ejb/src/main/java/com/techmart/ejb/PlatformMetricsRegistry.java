@@ -71,6 +71,7 @@ public class PlatformMetricsRegistry implements Serializable {
     public void addLog(String message) {
         String logEntry = "[" + java.time.LocalDateTime.now() + "] - " + message;
         systemLogs.add(logEntry);
+        System.out.println("[TechMart-SystemLog] " + logEntry);
         // Keep logs size bounded (e.g. last 30 logs)
         if (systemLogs.size() > 30) {
             systemLogs.remove(0);
