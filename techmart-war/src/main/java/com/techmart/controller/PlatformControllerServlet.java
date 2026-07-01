@@ -132,6 +132,12 @@ public class PlatformControllerServlet extends HttpServlet {
 
             } else if ("/api/checkout".equals(path)) {
                 ShoppingCartSession cart = getOrCreateCartSession(request);
+                
+                String customerName = request.getParameter("customerName");
+                if (customerName != null && !customerName.trim().isEmpty()) {
+                    cart.setCustomerName(customerName);
+                }
+                
                 Map<String, Integer> items = cart.getCartItems();
                 String customer = cart.getCustomerName();
 

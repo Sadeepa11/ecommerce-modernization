@@ -15,34 +15,55 @@
 
     <!-- ==================== CUSTOMER PORTAL VIEW ==================== -->
     <div id="customer-view">
-        <header class="cust-header">
-            <div class="nav-container">
-                <div class="cust-logo">
-                    <div class="cust-logo-icon">TM</div>
-                    <div class="cust-logo-text">
-                        <h1>TechMart Online</h1>
-                        <p>Java EE Platform Modernization</p>
-                    </div>
-                </div>
-
-                <nav class="cust-tabs">
-                    <button class="cust-tab-btn active" id="tab-btn-catalog" onclick="switchCustomerTab('catalog')">Catalog</button>
-                    <button class="cust-tab-btn" id="tab-btn-cart" onclick="switchCustomerTab('cart')">Cart</button>
-                    <button class="cust-tab-btn" id="tab-btn-orders" onclick="switchCustomerTab('orders')">Orders</button>
-                    <button class="cust-tab-btn" id="tab-btn-performance" onclick="switchCustomerTab('performance')">Performance</button>
-                </nav>
-
-                <div class="cust-header-actions">
-                    <button class="cart-icon-btn" onclick="switchCustomerTab('cart')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                        <span class="cart-badge" id="cart-badge-count">0</span>
-                    </button>
-                    <div class="avatar-badge" title="Customer Initials">JD</div>
+        <aside class="cust-sidebar">
+            <div class="cust-logo">
+                <div class="cust-logo-icon">TM</div>
+                <div class="cust-logo-text">
+                    <h1>TechMart Online</h1>
+                    <p>Java EE Modernization</p>
                 </div>
             </div>
-        </header>
 
-        <main class="cust-main">
+            <nav class="cust-tabs">
+                <button class="cust-tab-btn active" id="tab-btn-catalog" onclick="switchCustomerTab('catalog')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                    Catalog
+                </button>
+                <button class="cust-tab-btn" id="tab-btn-cart" onclick="switchCustomerTab('cart')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <span>Cart</span>
+                    <span class="tab-badge hidden" id="cart-tab-badge-count">0</span>
+                </button>
+                <button class="cust-tab-btn" id="tab-btn-orders" onclick="switchCustomerTab('orders')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span>Orders</span>
+                </button>
+                <button class="cust-tab-btn" id="tab-btn-performance" onclick="switchCustomerTab('performance')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    Performance
+                </button>
+            </nav>
+
+            <div class="cust-sidebar-footer">
+                <div class="sidebar-avatar-card">
+                    <div class="avatar-badge" title="Customer Initials">JD</div>
+                    <div class="shopper-info">
+                        <span class="shopper-title">Shopper Identity</span>
+                        <span class="shopper-name" id="sidebar-shopper-name">Sadeepa</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="cust-main-container">
+            <header class="cust-top-bar">
+                <button class="cart-icon-btn" onclick="switchCustomerTab('cart')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <span class="cart-badge" id="cart-badge-count">0</span>
+                </button>
+            </header>
+
+            <main class="cust-main">
             <!-- CATALOG TAB -->
             <div id="cust-tab-catalog" class="cust-tab-content">
                 <div class="cust-page-title">
@@ -72,9 +93,22 @@
                 <div class="cart-layout">
                     <div class="cart-card-container">
                         <div class="cart-header-row">
-                            <div class="customer-info-form" style="border: none; padding: 0; margin: 0;">
-                                <label for="customer-name-input" style="font-size: 0.9rem; font-weight: 600; margin-right: 1rem;">Customer Name:</label>
-                                <input type="text" id="customer-name-input" class="form-control" style="max-width: 300px; display: inline-block;" value="John Doe" onchange="updateCustomerName(this.value)">
+                            <div class="identity-card">
+                                <div class="identity-card-header">
+                                    <div class="identity-avatar-wrapper">
+                                        <div class="avatar-badge large" id="identity-avatar-large">JD</div>
+                                    </div>
+                                    <div class="identity-header-text">
+                                        <h3>Shopping Session Identity</h3>
+                                        <p>Orders placed will be registered under this name. You can modify it anytime.</p>
+                                    </div>
+                                </div>
+                                <div class="identity-input-group">
+                                    <div class="input-with-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="input-icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        <input type="text" id="customer-name-input" class="form-control premium-input" value="Sadeepa" onchange="updateCustomerName(this.value)" placeholder="Enter shopper name...">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -102,7 +136,7 @@
                             <span>Total</span>
                             <span id="cart-total">$0.00</span>
                         </div>
-                        <button class="btn btn-primary btn-place-order" id="btn-checkout" onclick="checkoutCart()" disabled>Place order</button>
+                        <button class="btn btn-primary btn-place-order" id="btn-checkout" onclick="openCheckoutModal()" disabled>Place order</button>
 
                     </div>
                 </div>
@@ -216,7 +250,7 @@
 
                 <div class="logs-panel">
                     <h3>Bean call breakdown</h3>
-                    <div class="orders-table-wrapper">
+                    <div class="orders-table-wrapper scrollable-table-wrapper">
                         <table class="orders-table">
                             <thead>
                                 <tr>
@@ -253,6 +287,42 @@
                 <p>Powered by Java EE 8, EJB 3.2, JMS 2.0, JPA 2.2, JTA, Payara Server.</p>
             </div>
         </footer>
+        </div> <!-- Closing of cust-main-container -->
+
+        <!-- Modern Glassmorphism Modal for Checkout Confirmation -->
+        <div id="checkout-modal" class="modal-overlay">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>Confirm Your Order</h3>
+                    <button class="modal-close" onclick="closeCheckoutModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="checkout-summary-box">
+                        <h4 style="margin-bottom: 0.75rem; font-size: 0.95rem; font-weight: 700; color: var(--cust-text);">Order Summary</h4>
+                        <div class="checkout-summary-details" id="modal-order-summary-details">
+                            <!-- Dynamically populated summary of items -->
+                        </div>
+                        <div class="checkout-total-row">
+                            <span>Total Amount:</span>
+                            <strong id="modal-order-total-price">$0.00</strong>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <label for="modal-customer-name-input" style="font-weight: 600; font-size: 0.85rem; color: var(--cust-text); display: block; margin-bottom: 0.5rem;">
+                            Customer Name (Confirm/Modify)
+                        </label>
+                        <div class="input-with-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="input-icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            <input type="text" id="modal-customer-name-input" class="form-control premium-input" placeholder="Enter name for this order..." required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeCheckoutModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitCheckout()">Confirm & Place Order</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ==================== CORE SCRIPT LOGIC ==================== -->
@@ -266,6 +336,13 @@
 
         // Load resources on startup
         document.addEventListener('DOMContentLoaded', () => {
+            const savedName = localStorage.getItem('customerName') || "Sadeepa";
+            const nameInput = document.getElementById('customer-name-input');
+            if (nameInput) {
+                nameInput.value = savedName;
+            }
+            updateCustomerName(savedName);
+            
             loadAllData();
             // Start real-time metrics and logs polling
             setInterval(pollRealTimeMetrics, 1200);
@@ -456,15 +533,30 @@
 
         // Update active Customer Name
         function updateCustomerName(name) {
-            document.querySelector('.avatar-badge').innerText = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2);
+            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            document.querySelectorAll('.avatar-badge').forEach(badge => {
+                badge.innerText = initials;
+            });
+            const sidebarName = document.getElementById('sidebar-shopper-name');
+            if (sidebarName) {
+                sidebarName.innerText = name;
+            }
+            if (name) {
+                localStorage.setItem('customerName', name);
+            }
         }
 
-        // Stateful Cart Actions
         function fetchCart() {
             fetch(`${API_BASE}/cart/view`)
                 .then(res => res.json())
                 .then(cart => {
                     currentCart = cart;
+                    let nameToUse = cart.customerName || localStorage.getItem('customerName') || "Sadeepa";
+                    const input = document.getElementById('customer-name-input');
+                    if (input) {
+                        input.value = nameToUse;
+                    }
+                    updateCustomerName(nameToUse);
                     updateCartUI();
                 })
                 .catch(err => console.error("Error retrieving cart:", err));
@@ -481,6 +573,17 @@
             let totalItemsCount = 0;
             keys.forEach(k => totalItemsCount += items[k]);
             document.getElementById('cart-badge-count').innerText = totalItemsCount;
+
+            // Set cart items count badge in sidebar tab
+            const sidebarCartBadge = document.getElementById('cart-tab-badge-count');
+            if (sidebarCartBadge) {
+                sidebarCartBadge.innerText = totalItemsCount;
+                if (totalItemsCount > 0) {
+                    sidebarCartBadge.classList.remove('hidden');
+                } else {
+                    sidebarCartBadge.classList.add('hidden');
+                }
+            }
 
             if (keys.length === 0) {
                 checkoutBtn.disabled = true;
@@ -575,19 +678,85 @@
             .catch(err => console.error("Error adding to cart:", err));
         }
 
-        function checkoutCart() {
-            fetch(`${API_BASE}/checkout`, { method: 'POST' })
-                .then(async res => {
-                    const data = await res.json();
-                    if (res.ok) {
-                        showToast("Order published to JMS queue asynchronously!", "success");
-                        switchCustomerTab('orders');
-                        loadAllData();
-                    } else {
-                        showToast(data.error || "Failed to checkout.", "error");
-                    }
-                })
-                .catch(err => console.error("Error in checkout:", err));
+        function openCheckoutModal() {
+            const customerNameInput = document.getElementById('customer-name-input');
+            const modalCustomerNameInput = document.getElementById('modal-customer-name-input');
+            
+            // Prefill with current name from the input field
+            modalCustomerNameInput.value = customerNameInput.value.trim();
+            
+            // Generate order summary details in the modal
+            const summaryDetails = document.getElementById('modal-order-summary-details');
+            const totalPriceText = document.getElementById('cart-total').innerText;
+            document.getElementById('modal-order-total-price').innerText = totalPriceText;
+            
+            const items = currentCart.items || {};
+            const keys = Object.keys(items);
+            
+            let summaryHtml = '';
+            keys.forEach(sku => {
+                const qty = items[sku];
+                const product = currentProducts.find(p => p.sku === sku);
+                const name = product ? product.name : "Product SKU: " + sku;
+                summaryHtml += `
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.25rem;">
+                        <span style="color: var(--cust-text-muted);">${qty}x ${name}</span>
+                        <span style="font-weight: 600;">SKU: ${sku}</span>
+                    </div>
+                `;
+            });
+            summaryDetails.innerHTML = summaryHtml;
+            
+            // Show the modal
+            const modal = document.getElementById('checkout-modal');
+            modal.classList.add('show');
+        }
+
+        function closeCheckoutModal() {
+            const modal = document.getElementById('checkout-modal');
+            modal.classList.remove('show');
+        }
+
+        function submitCheckout() {
+            const modalCustomerNameInput = document.getElementById('modal-customer-name-input');
+            const newName = modalCustomerNameInput.value.trim();
+            
+            if (!newName) {
+                showToast("Please enter a valid customer name to place the order.", "warning");
+                return;
+            }
+            
+            // Sync with main name input
+            const mainNameInput = document.getElementById('customer-name-input');
+            if (mainNameInput) {
+                mainNameInput.value = newName;
+                updateCustomerName(newName);
+            }
+            
+            // Place the order
+            checkoutCart(newName);
+            closeCheckoutModal();
+        }
+
+        function checkoutCart(customerName) {
+            let url = `${API_BASE}/checkout`;
+            if (customerName) {
+                url += `?customerName=${encodeURIComponent(customerName)}`;
+            }
+            fetch(url, { 
+                method: 'POST'
+            })
+            .then(async res => {
+                const data = await res.json();
+                if (res.ok) {
+                    showToast("Order published to JMS queue asynchronously!", "success");
+                    switchCustomerTab('orders');
+                    loadAllData();
+                } else {
+                    showToast(data.error || "Failed to checkout.", "error");
+                }
+            })
+            .catch(err => console.error("Error in checkout:", err));
         }
 
         // Fetch placed orders history
@@ -643,6 +812,7 @@
 
         // Metrics polling & chart drawing
         function pollRealTimeMetrics() {
+            fetchOrders();
             fetch(`${API_BASE}/metrics`)
                 .then(res => res.json())
                 .then(metrics => {

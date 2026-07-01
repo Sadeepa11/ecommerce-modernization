@@ -24,17 +24,17 @@
     --info-bg: rgba(59, 130, 246, 0.08);
     --info-border: rgba(59, 130, 246, 0.2);
 
-    /* Customer Portal Theme (Pink/Rose) */
-    --cust-bg: #f8fafc;
+    /* Customer Portal Theme (Premium Pink/Rose - Glassmorphism) */
+    --cust-bg: #faf7f9;
     --cust-header-bg: rgba(255, 255, 255, 0.85);
     --cust-card-bg: #ffffff;
-    --cust-border: #e2e8f0;
-    --cust-primary: #db2777;
+    --cust-border: #f5e6eb;
+    --cust-primary: #db2777; /* Deep Hot Pink */
     --cust-primary-hover: #be185d;
-    --cust-accent: #f43f5e;
-    --cust-text: #1e293b;
-    --cust-text-muted: #64748b;
-    --cust-nav-hover: #f1f5f9;
+    --cust-accent: #f43f5e; /* Vibrant Rose */
+    --cust-text: #1e1115;
+    --cust-text-muted: #8c737c;
+    --cust-nav-hover: #fdf2f8;
 
     /* Admin Cockpit Theme (Dark Slate & Premium Blue) */
     --admin-bg: #0f172a;
@@ -339,22 +339,95 @@ body {
 }
 
 /* --- CLIENT STOREFRONT PORTAL --- */
-.cust-header {
-    background-color: var(--cust-header-bg);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--cust-border);
-    padding: 1rem 2rem;
+#customer-view {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+    width: 100%;
+}
+
+@media (max-width: 1024px) {
+    #customer-view {
+        grid-template-columns: 1fr;
+    }
+    .cust-sidebar {
+        position: relative !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--cust-border);
+    }
+    .cust-tabs {
+        flex-direction: row !important;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+}
+
+.cust-sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid var(--cust-border);
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    height: 100vh;
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
-.nav-container {
-    max-width: 1300px;
-    margin: 0 auto;
+.cust-sidebar-footer {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--cust-border);
+}
+
+.sidebar-avatar-card {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 0.75rem;
+    background-color: var(--cust-nav-hover);
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--cust-border);
+}
+
+.shopper-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.shopper-title {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--cust-text-muted);
+    text-transform: uppercase;
+}
+
+.shopper-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--cust-text);
+    word-break: break-all;
+}
+
+.cust-main-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--cust-bg);
+    min-height: 100vh;
+}
+
+.cust-top-bar {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--cust-border);
+    padding: 1rem 2.5rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .cust-logo {
@@ -390,19 +463,25 @@ body {
 
 .cust-tabs {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
+    margin-top: 2rem;
 }
 
 .cust-tab-btn {
     background: none;
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--cust-text-muted);
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
 }
 
 .cust-tab-btn:hover {
@@ -413,12 +492,6 @@ body {
 .cust-tab-btn.active {
     background-color: rgba(219, 39, 119, 0.08);
     color: var(--cust-primary);
-}
-
-.cust-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
 }
 
 .cart-icon-btn {
@@ -487,10 +560,10 @@ body {
 /* Page Containers */
 .cust-main {
     flex: 1;
-    max-width: 1300px;
+    margin: 1.5rem auto;
+    padding: 0 2.5rem;
+    max-width: 1200px;
     width: 100%;
-    margin: 2rem auto;
-    padding: 0 1.5rem;
 }
 
 .cust-page-title {
@@ -1412,4 +1485,162 @@ body {
     flex-direction: column;
     gap: 0.5rem;
     border: 1px solid var(--admin-border);
+}
+
+/* Checkout confirmation modal specific styling */
+.checkout-summary-box {
+    background-color: #f8fafc;
+    border: 1.5px solid var(--cust-border);
+    border-radius: var(--border-radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.checkout-summary-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-bottom: 1px dashed var(--cust-border);
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.checkout-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--cust-text);
+}
+
+.checkout-total-row strong {
+    font-size: 1.2rem;
+    color: var(--cust-primary);
+}
+
+/* Enhancements for forms */
+.form-group label svg {
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+/* Premium Shopping Identity Card */
+.identity-card {
+    background: linear-gradient(135deg, #ffffff, #fff5f8);
+    border: 1px solid rgba(219, 39, 119, 0.15);
+    border-radius: var(--border-radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 0 4px 20px -5px rgba(219, 39, 119, 0.05);
+    transition: var(--transition);
+}
+
+.identity-card:hover {
+    box-shadow: 0 10px 25px -10px rgba(219, 39, 119, 0.1);
+    border-color: rgba(219, 39, 119, 0.25);
+}
+
+.identity-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.identity-avatar-wrapper {
+    flex-shrink: 0;
+}
+
+.avatar-badge.large {
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, var(--cust-primary), var(--cust-accent));
+    color: white;
+    box-shadow: 0 4px 10px rgba(219, 39, 119, 0.2);
+    border: none;
+}
+
+.identity-header-text h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--cust-text);
+    margin-bottom: 0.15rem;
+}
+
+.identity-header-text p {
+    font-size: 0.75rem;
+    color: var(--cust-text-muted);
+}
+
+.identity-input-group {
+    max-width: 350px;
+    width: 100%;
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input-with-icon .input-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--cust-text-muted);
+    pointer-events: none;
+    transition: var(--transition);
+}
+
+.form-control.premium-input {
+    padding-left: 2.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+}
+
+.input-with-icon:focus-within .input-icon {
+    color: var(--cust-primary);
+}
+
+/* Scrollable table wrapper for performance metrics breakdown */
+.scrollable-table-wrapper {
+    max-height: 320px;
+    overflow-y: auto;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--cust-border);
+}
+
+.scrollable-table-wrapper thead th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background-color: #f8fafc;
+}
+
+/* Sidebar Tab Badge styling */
+.tab-badge {
+    background-color: var(--cust-primary);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: 12px;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    box-shadow: 0 2px 5px rgba(219, 39, 119, 0.25);
+    transition: var(--transition);
+}
+
+.tab-badge.hidden {
+    display: none !important;
 }
