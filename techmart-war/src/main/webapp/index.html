@@ -49,7 +49,7 @@
                     <div class="avatar-badge" title="Customer Initials">JD</div>
                     <div class="shopper-info">
                         <span class="shopper-title">Shopper Identity</span>
-                        <span class="shopper-name" id="sidebar-shopper-name">Sadeepa</span>
+                        <span class="shopper-name" id="sidebar-shopper-name">Semini</span>
                     </div>
                 </div>
             </div>
@@ -106,7 +106,7 @@
                                 <div class="identity-input-group">
                                     <div class="input-with-icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="input-icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                        <input type="text" id="customer-name-input" class="form-control premium-input" value="Sadeepa" onchange="updateCustomerName(this.value)" placeholder="Enter shopper name...">
+                                        <input type="text" id="customer-name-input" class="form-control premium-input" value="Semini" onchange="updateCustomerName(this.value)" placeholder="Enter shopper name...">
                                     </div>
                                 </div>
                             </div>
@@ -336,7 +336,7 @@
 
         // Load resources on startup
         document.addEventListener('DOMContentLoaded', () => {
-            const savedName = localStorage.getItem('customerName') || "Sadeepa";
+            const savedName = localStorage.getItem('customerName') || "Semini";
             const nameInput = document.getElementById('customer-name-input');
             if (nameInput) {
                 nameInput.value = savedName;
@@ -551,7 +551,7 @@
                 .then(res => res.json())
                 .then(cart => {
                     currentCart = cart;
-                    let nameToUse = cart.customerName || localStorage.getItem('customerName') || "Sadeepa";
+                    let nameToUse = cart.customerName || localStorage.getItem('customerName') || "Semini";
                     const input = document.getElementById('customer-name-input');
                     if (input) {
                         input.value = nameToUse;
