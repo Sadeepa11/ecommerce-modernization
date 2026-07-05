@@ -6,3 +6,5 @@ target/
 *.ear
 *.war
 *.jar
+config.bat
+node_modules
